@@ -1,0 +1,5 @@
+name: MegaCord
+version: '${project.version}'
+main: de.megacord.MegaCord
+type: bungeecord
+author: LevinGamer8
