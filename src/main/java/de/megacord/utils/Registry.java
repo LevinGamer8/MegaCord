@@ -61,6 +61,7 @@ public class Registry {
         pluginManager.registerCommand(plugin, new OnlineZeitCommand());
         pluginManager.registerCommand(plugin, new BungeeCommand());
         pluginManager.registerCommand(plugin, new JumpCommand());
+        pluginManager.registerCommand(plugin, new setMaxIP());
         plugin.getLogger().log(Level.INFO, "Befehle wurden erfolgreich registriert");
     }
 

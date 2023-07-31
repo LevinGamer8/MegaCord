@@ -8,6 +8,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.LoginEvent;
+import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
@@ -104,7 +105,23 @@ public class PlayerJoinListener implements Listener {
             updateBans();
             updateIP(target, e.getConnection().getAddress().getAddress().getHostAddress());
 
+        PlayerData pl = new PlayerData(con.getUniqueId());
+        pl.setIPOnlinePlayers(con.getAddress().getAddress().getHostAddress(), pl.getIPOnlinePlayers(con.getAddress().getAddress().getHostAddress()) + 1);
+             if ((pl.getIPOnlinePlayers(con.getAddress().getAddress().getHostAddress()) > pl.getMaxIP(con.getAddress().getAddress().getHostAddress()))) {
+                  e.setCancelled(true);
+                  con.disconnect("§3MegaCord §4AntiAlts \n\n §bMelde ich sofort im Support§4!!!\n\n §9Discord: §bhttps://dc-megacraft.de.cool/ \n\n §eID§7: §35896" + pl.getMaxIP(con.getAddress().getAddress().getHostAddress()));
+                 }
+        if (e.isCancelled()) {
+            pl.setIPOnlinePlayers(con.getAddress().getAddress().getHostAddress(), pl.getIPOnlinePlayers(con.getAddress().getAddress().getHostAddress()) - 1);
         }
+    }
+
+    @EventHandler
+    public void onLeave(PlayerDisconnectEvent e) {
+        ProxiedPlayer con = e.getPlayer();
+        PlayerData pl = new PlayerData(con.getUniqueId());
+        pl.setIPOnlinePlayers(con.getAddress().getAddress().getHostAddress(), pl.getIPOnlinePlayers(con.getAddress().getAddress().getHostAddress()) - 1);
+    }
 
     private void updateBans() {
         try (Connection conn = source.getConnection();

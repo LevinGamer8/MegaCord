@@ -3,10 +3,13 @@ package de.megacord.utils;
 import de.megacord.MegaCord;
 
 import javax.sql.DataSource;
+import java.net.SocketAddress;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -24,6 +27,9 @@ public class PlayerData {
     private int reportsMade;
     private int bansReceive;
     private int warnsReceive;
+
+
+    Map<String, Integer> ipOnlinePlayers = new HashMap<>();
     private DataSource source;
 
     public PlayerData(UUID uuid) {
@@ -137,16 +143,19 @@ public class PlayerData {
                 setReportsMade(rs.getInt("reportsMade"));
                 setBansReceive(rs.getInt("bansReceive"));
                 setWarnsReceive(rs.getInt("warnsReceive"));
+                setMaxIP(getLastip(), rs.getInt("maxIP"));
+                setIPOnlinePlayers(getLastip(), rs.getInt("ipOnlinePlayers"));
             }
         } catch (SQLException e) {
             MegaCord.logger().log(Level.WARNING, "could not load playerdata", e);
         }
     }
 
+
     public void createPlayer(UUID target, String ip, String name) {
         setUuid(target);
         setName(name);
-        try (Connection conn = source.getConnection(); PreparedStatement ps = conn.prepareStatement("INSERT INTO playerdata (UUID,Name,firstIP,lastIP,firstJoin,lastOnline,bansMade,warnsMade,reportsMade,bansReceive,warnsReceive) VALUES(?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE UUID=UUID")) {
+        try (Connection conn = source.getConnection(); PreparedStatement ps = conn.prepareStatement("INSERT INTO playerdata (UUID,Name,firstIP,lastIP,firstJoin,lastOnline,bansMade,warnsMade,reportsMade,bansReceive,warnsReceive,maxIP,ipOnlinePlayers) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE UUID=UUID")) {
             ps.setString(1, getUuid().toString()); // uuid
             ps.setString(2, getName()); // name
             ps.setString(3, ip.replace("/", "").split(":")[0]);
@@ -158,6 +167,8 @@ public class PlayerData {
             ps.setInt(9, 0); // reportsMade
             ps.setInt(10, 0); //  bansReceived
             ps.setInt(11, 0); // warnsReceived
+            ps.setInt(12, 1); //maxAccountPerIP
+            ps.setInt(13, 0); //ipOnlinePlayers
             ps.executeUpdate();
         } catch (SQLException e) {
             MegaCord.logger().log(Level.WARNING, "could not create playerdata", e);
@@ -248,4 +259,49 @@ public class PlayerData {
                 return false;
             }
         }
+
+    public int getMaxIP(String address) throws SQLException {
+        try (Connection conn = source.getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT * FROM playerdata WHERE lastIP = ?" )) {
+            ps.setString(1, address);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                return (rs.getInt("maxIP"));
+            }
+        }
+        return 1;
+    }
+
+    public void setMaxIP(String address, int maxIP) throws SQLException {
+             try (Connection conn = source.getConnection(); PreparedStatement ps = conn.prepareStatement("UPDATE playerdata SET maxIP = ? WHERE lastIP = ?")) {
+                 ps.setInt(1, maxIP);
+                 ps.setString(2, address);
+                 ps.executeUpdate();
+        }
+    }
+
+    public int getIPOnlinePlayers(String hostAddress) {
+        try (Connection conn = source.getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT * FROM playerdata WHERE lastIP = ?" )) {
+            ps.setString(1, hostAddress);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                return (rs.getInt("ipOnlinePlayers"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return 0;
+    }
+
+    public void setIPOnlinePlayers(String hostAddress, int onlinePlayers) {
+        ipOnlinePlayers.put(hostAddress, onlinePlayers);
+        try (Connection conn = source.getConnection(); PreparedStatement ps = conn.prepareStatement("UPDATE playerdata SET ipOnlinePlayers = ? WHERE lastIP = ?")) {
+            ps.setInt(1, onlinePlayers);
+            ps.setString(2, hostAddress);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
