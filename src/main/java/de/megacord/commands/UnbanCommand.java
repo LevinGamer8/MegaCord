@@ -2,9 +2,7 @@ package de.megacord.commands;
 
 import de.megacord.MegaCord;
 import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
 import javax.sql.DataSource;
@@ -28,6 +26,7 @@ public class UnbanCommand extends Command {
                 try (Connection conn = getSource().getConnection(); PreparedStatement ps = conn.prepareStatement("DELETE FROM bannedPlayers WHERE TargetName = ?")) {
                     ps.setString(1, args[0]);
                     ps.executeUpdate();
+                    sender.sendMessage(MegaCord.Prefix + "§aDer §6Spieler §awurde erfolgreich entbannt!");
                 } catch (SQLException e) {
                     MegaCord.logger().log(Level.WARNING, "could not delete player from bannedplayer-Table", e);
                 }

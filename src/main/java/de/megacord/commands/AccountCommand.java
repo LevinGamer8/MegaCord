@@ -30,7 +30,7 @@ public class AccountCommand extends Command {
     private ArrayList<String> ips = new ArrayList<>();
     private ArrayList<String> names = new ArrayList<>();
     private ArrayList<String> warschon = new ArrayList<>();
-    private DataSource source;
+
 
     @Override
     public void execute(CommandSender sender, String[] args) {
@@ -38,23 +38,25 @@ public class AccountCommand extends Command {
             if (args.length == 0) {
                 sendAccounts(sender);
             } else if (args.length == 1) {
-                String lastIP;
-                if (!args[0].contains(".")) {
-
-                    ProxiedPlayer p = ProxyServer.getInstance().getPlayer(args[0]);
-                    if (p == null) {
-                        sender.sendMessage(new TextComponent(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Gebe einen richtigen Spieler an!")));
-                        return;
-                    }
-                    PlayerData playerdata = new PlayerData(p.getName());
-                    lastIP = playerdata.getLastip();
-                    if (lastIP == null || lastIP == "") {
-                        sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler war noch nie auf dem Netzwerk!"));
-                        return;
-                    }
-                } else
-                    lastIP = args[0];
+                String lastIP = args[0];
                 String[] lastIPSplit = lastIP.split("\\.");
+
+                if (lastIPSplit.length < 3) {
+                    sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Bitte verwende eine richtige IP (XXX.XXX.XXX)"));
+                    return;
+                }
+
+                ProxiedPlayer p = ProxyServer.getInstance().getPlayer(args[0]);
+                if (p == null) {
+                    sender.sendMessage(new TextComponent(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Gebe einen richtigen Spieler an!")));
+                    return;
+                }
+                PlayerData playerdata = new PlayerData(p.getName());
+                lastIP = playerdata.getLastip();
+                if (lastIP == null || lastIP == "") {
+                    sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler war noch nie auf dem Netzwerk!"));
+                    return;
+                }
                 if (lastIPSplit.length >= 3) {
                     try {
                         //Split
@@ -89,14 +91,13 @@ public class AccountCommand extends Command {
                     }
                     if (count <= 0)
                         sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Keine Alt Accounts gefunden!"));
+                } else {
+                    sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Nutzung: /alts (Spielername/IP)"));
                 }
-            }  else {
-                sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Nutzung: /alts (Spielername/IP)"));
-            }
-        } else
-            sender.sendMessage(new TextComponent(MegaCord.noPerm));
+            } else
+                sender.sendMessage(new TextComponent(MegaCord.noPerm));
+        }
     }
-
     private void sendAccounts(CommandSender sender) {
         try (Connection conn = MegaCord.getInstance().getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement("SELECT lastIP, Name FROM playerdata GROUP BY lastIP HAVING COUNT(lastIP) > 1")) {
             ips.clear();
