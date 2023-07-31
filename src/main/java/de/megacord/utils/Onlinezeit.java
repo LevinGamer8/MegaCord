@@ -28,15 +28,14 @@ import static de.megacord.utils.Config.settings;
 
 public class Onlinezeit {
 
-    private java.util.UUID UUID;
     private String name;
     private String datum;
     private CommandSender sender;
 
     private DataSource source;
 
-    public Onlinezeit(java.util.UUID UUID, String datum, DataSource source) {
-        this.UUID = UUID;
+    public Onlinezeit(String Name, String datum, DataSource source) {
+        this.name = Name;
         this.datum = datum;
         this.source = source;
     }
@@ -55,8 +54,8 @@ public class Onlinezeit {
         if (wasOnlineToday()) {
             long timeTodayOnline = 0L;
             try (Connection conn = getSource().getConnection();
-                 PreparedStatement ps = conn.prepareStatement("SELECT Datum,Onlinezeit FROM onlinetime WHERE UUID = ? AND DATUM = ? LIMIT 1");) {
-                ps.setString(1, this.getUUID().toString());
+                 PreparedStatement ps = conn.prepareStatement("SELECT Datum,Onlinezeit FROM onlinetime WHERE Name = ? AND DATUM = ? LIMIT 1");) {
+                ps.setString(1, name);
                 ps.setString(2, this.getDatum());
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
@@ -67,15 +66,14 @@ public class Onlinezeit {
                 return;
             }
 
-            MegaCord.getInstance().getAllOnlineTimeToday().put(this.getUUID(), System.currentTimeMillis() - timeTodayOnline);
+            MegaCord.getInstance().getAllOnlineTimeToday().put(name, System.currentTimeMillis() - timeTodayOnline);
         } else {
-            MegaCord.getInstance().getAllOnlineTimeToday().put(this.getUUID(), System.currentTimeMillis());
+            MegaCord.getInstance().getAllOnlineTimeToday().put(name, System.currentTimeMillis());
             try (Connection conn = getSource().getConnection();
-                 PreparedStatement ps = conn.prepareStatement("INSERT INTO onlinetime(UUID, Name, Datum, onlinezeit) VALUES (?,?,?,?)");) {
-                ps.setString(1, this.getUUID().toString());
-                ps.setString(2, this.getName());
-                ps.setString(3, this.getDatum());
-                ps.setLong(4, 0L);
+                 PreparedStatement ps = conn.prepareStatement("INSERT INTO onlinetime(Name, Datum, onlinezeit) VALUES (?,?,?)");) {
+                ps.setString(1, this.getName());
+                ps.setString(2, this.getDatum());
+                ps.setLong(3, 0L);
                 ps.executeUpdate();
             } catch (SQLException e) {
                 MegaCord.logger().log(Level.WARNING, "failed to insert player into database to create new onlinetime", e);
@@ -85,8 +83,8 @@ public class Onlinezeit {
 
     private boolean wasOnlineToday() {
         try (Connection conn = getSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT UUID,Datum FROM onlinetime WHERE UUID = ? AND Datum = ? LIMIT 1;")) {
-            ps.setString(1, this.getUUID().toString());
+             PreparedStatement ps = conn.prepareStatement("SELECT Name,Datum FROM onlinetime WHERE Name = ? AND Datum = ? LIMIT 1;")) {
+            ps.setString(1, this.name);
             ps.setString(2, this.getDatum());
             ResultSet rs = ps.executeQuery();
             return rs.next();
@@ -97,15 +95,15 @@ public class Onlinezeit {
     }
 
     public void leave() {
-        if (MegaCord.getInstance().getAllOnlineTimeToday().containsKey(this.getUUID())) {
-            long joinTS = MegaCord.getInstance().getAllOnlineTimeToday().get(this.getUUID());
+        if (MegaCord.getInstance().getAllOnlineTimeToday().containsKey(this.getName())) {
+            long joinTS = MegaCord.getInstance().getAllOnlineTimeToday().get(this.getName());
             long leaveTS = System.currentTimeMillis();
             long timeOnline = leaveTS - joinTS;
-            MegaCord.getInstance().getAllOnlineTimeToday().remove(this.getUUID());
+            MegaCord.getInstance().getAllOnlineTimeToday().remove(this.getName());
             try (Connection conn = getSource().getConnection();
-                 PreparedStatement ps = conn.prepareStatement("UPDATE onlinetime SET onlinezeit = ? WHERE UUID = ? AND Datum = ?")) {
+                 PreparedStatement ps = conn.prepareStatement("UPDATE onlinetime SET onlinezeit = ? WHERE Name = ? AND Datum = ?")) {
                 ps.setLong(1, timeOnline);
-                ps.setString(2, this.getUUID().toString());
+                ps.setString(2, this.getName().toString());
                 ps.setString(3, this.getDatum());
                 ps.executeUpdate();
             } catch (SQLException e) {
@@ -114,10 +112,10 @@ public class Onlinezeit {
         }
     }
 
-    private HashMap<String, Long> getLastXDays(ArrayList<String> dayStrings, java.util.UUID from) {
+    private HashMap<String, Long> getLastXDays(ArrayList<String> dayStrings, String from) {
         HashMap<String, Long> times = new HashMap<>();
         LinkedHashMap<String, Long> zeiten = new LinkedHashMap<>();
-        String startSQL = "SELECT * FROM onlinetime WHERE UUID=? AND (Datum=?";
+        String startSQL = "SELECT * FROM onlinetime WHERE Name=? AND (Datum=?";
         StringBuilder dates = new StringBuilder();
         for (int i = 1; i < dayStrings.size(); i++) {
             dates.append(" OR Datum=?");
@@ -125,7 +123,7 @@ public class Onlinezeit {
         String finishSQL = startSQL + dates + ")";
         try (Connection conn = getSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(finishSQL)) {
-            ps.setString(1, from.toString());
+            ps.setString(1, from);
             for (int i = 2; i <= dayStrings.size() + 1; i++) {
                 ps.setString(i, dayStrings.get(i - 2));
             }
@@ -142,11 +140,11 @@ public class Onlinezeit {
         return zeiten;
     }
 
-    public void sendTrend(UUID from, int lastDays, boolean consoleConform) {
+    public void sendTrend(String from, int lastDays, boolean consoleConform) {
         sendTrend(from, lastDays, consoleConform, "");
     }
 
-    public void sendTrend(UUID from, int lastDays, boolean consoleConform, String text) {
+    public void sendTrend(String from, int lastDays, boolean consoleConform, String text) {
         double yQuer, tQuer, b, tyt = 0, T, t2 = 0, tQuer2, a, mQuer;
 
         ArrayList<String> dayStrings = new ArrayList<>();
@@ -195,13 +193,13 @@ public class Onlinezeit {
         if (!text.equalsIgnoreCase(""))
             tc.setText(MegaCord.Prefix + text);
         else
-            tc.setText(MegaCord.Prefix + "Hier der Trend von " + UUIDFetcher.getName(from) + ": ");
+            tc.setText(MegaCord.Prefix + "Hier der Trend von " + from + ": ");
         TextComponent tc1 = new TextComponent();
         tc1.setText(MegaCord.other2 + "[" + MegaCord.fehler + "MEHR" + MegaCord.other2 + "]");
 
     }
 
-    public void sendWeek(String fromUUID, boolean consoleConform) {
+    public void sendWeek(String from, boolean consoleConform) {
         if (1 > 0)
             return;
         // consoleConform steht dafür, ob es denn für die Console extra ausgegeben werden soll (wegen Textcomponent usw.)
@@ -215,13 +213,13 @@ public class Onlinezeit {
             DateTimeFormatter niceFormatter = DateTimeFormatter.ofPattern("EEEE");
             String dayBeforeString = date.format(formatter);
             if (i == 0) {
-                long actualTime = getActualTime(java.util.UUID.fromString(fromUUID));
+                long actualTime = getActualTime(name);
                 if (actualTime != -1)
                     days.put(date.format(niceFormatter), actualTime);
                 else
-                    days.put(date.format(niceFormatter), getMsPerDay(dayBeforeString, fromUUID));
+                    days.put(date.format(niceFormatter), getMsPerDay(dayBeforeString, from));
             } else
-                days.put(date.format(niceFormatter), getMsPerDay(dayBeforeString, fromUUID));
+                days.put(date.format(niceFormatter), getMsPerDay(dayBeforeString, from));
         }
         String today = "Heute";
         int count = 0;
@@ -257,7 +255,7 @@ public class Onlinezeit {
 
     public void sendFromDate(Long dateTS, String player) {
         try (Connection conn = getSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT * FROM onlinetime WHERE " + (dateTS == null ? "" : "Datum = ?") + (player != null && dateTS != null ? " AND " : "") + (player == null ? "" : "UUID = ?"))) {
+             PreparedStatement ps = conn.prepareStatement("SELECT * FROM onlinetime WHERE " + (dateTS == null ? "" : "Datum = ?") + (player != null && dateTS != null ? " AND " : "") + (player == null ? "" : "Name = ?"))) {
             LocalDateTime date = null;
             DateTimeFormatter formatter = null;
             if (dateTS != null) {
@@ -266,7 +264,7 @@ public class Onlinezeit {
                 ps.setString(1, date.format(formatter));
             }
             if (player != null)
-                ps.setString((dateTS == null ? 1 : 2), UUIDFetcher.getUUID(player).toString());
+                ps.setString((dateTS == null ? 1 : 2), player);
             ResultSet rs = ps.executeQuery();
             int counter = 0;
             this.getSender().sendMessage(new TextComponent(MegaCord.Prefix + "Tag: " + MegaCord.herH + (dateTS == null ? "Insgesamt" : date.format(formatter)) + MegaCord.other2 + " (" + MegaCord.herH + (player == null ? "Alle" : player) + MegaCord.other2 + ")"));
@@ -293,9 +291,9 @@ public class Onlinezeit {
                     TextComponent tc = new TextComponent();
                     if (i == 1) { // %onlinezeit% Textcomponent
                         TextComponent tc1 = new TextComponent();
-                        if (MegaCord.getInstance().getAllOnlineTimeToday().containsKey(java.util.UUID.fromString(rs.getString("UUID")))) {
+                        if (MegaCord.getInstance().getAllOnlineTimeToday().containsKey(rs.getString("Name"))) {
                             // Ist der aktuelle Spieler online?
-                            long dif = getActualTime(UUIDFetcher.getUUID(rs.getString("Name")));
+                            long dif = getActualTime((rs.getString("Name")));
                             if (dateTS != null) {
                                 LocalDateTime date2 = LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Europe/Berlin"));
                                 DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -335,10 +333,10 @@ public class Onlinezeit {
         }
     }
 
-    private long getMsPerDay(String day, String fromUUID) {
+    private long getMsPerDay(String day, String from) {
         try (Connection conn = getSource().getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT onlinezeit FROM onlinetime WHERE UUID = ? AND Datum = ?")) {
-            ps.setString(1, fromUUID);
+             PreparedStatement ps = conn.prepareStatement("SELECT onlinezeit FROM onlinetime WHERE Name = ? AND Datum = ?")) {
+            ps.setString(1, from);
             ps.setString(2, day);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -443,10 +441,10 @@ public class Onlinezeit {
         return (double) tmp / factor;
     }
 
-    public long getActualTime(java.util.UUID fromUUID) {
+    public long getActualTime(String from) {
         try {
-            if (ProxyServer.getInstance().getPlayer(fromUUID).isConnected()) {
-                long joinTS = MegaCord.getInstance().getAllOnlineTimeToday().get(fromUUID);
+            if (ProxyServer.getInstance().getPlayer(from).isConnected()) {
+                long joinTS = MegaCord.getInstance().getAllOnlineTimeToday().get(from);
                 long leaveTS = System.currentTimeMillis();
                 return leaveTS - joinTS;
             } else {
@@ -567,9 +565,6 @@ public class Onlinezeit {
         return sender;
     }
 
-    public java.util.UUID getUUID() {
-        return UUID;
-    }
 
     public String getName() {
         return name;

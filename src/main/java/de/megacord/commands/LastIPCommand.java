@@ -28,7 +28,7 @@ public class LastIPCommand extends Command {
 
         if (sender instanceof ProxiedPlayer) {
             ProxiedPlayer target = ProxyServer.getInstance().getPlayer(args[0]);
-            UUID uuid = target.getUniqueId();
+            String uuid = String.valueOf(target.getUniqueId());
 
             if(uuid == null) {
                 sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler existiert nicht!"));

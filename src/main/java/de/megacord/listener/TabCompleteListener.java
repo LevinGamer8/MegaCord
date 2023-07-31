@@ -37,6 +37,7 @@ public class TabCompleteListener implements Listener {
                 !cursor.startsWith("/chatlog ") &&
                 !cursor.startsWith("/chatlogs ") &&
                 !cursor.startsWith("/onlinezeit ") &&
+                !cursor.startsWith("/setmaxip ") &&
                 !cursor.startsWith("/editban ")) {
             return;
         }

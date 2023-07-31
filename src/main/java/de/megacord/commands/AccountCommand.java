@@ -4,6 +4,7 @@ import de.megacord.MegaCord;
 import de.megacord.utils.PlayerData;
 import de.megacord.utils.UUIDFetcher;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -40,12 +41,12 @@ public class AccountCommand extends Command {
                 String lastIP;
                 if (!args[0].contains(".")) {
 
-                    UUID ut = UUIDFetcher.getUUID(args[0]);
-                    if (ut == null) {
+                    ProxiedPlayer p = ProxyServer.getInstance().getPlayer(args[0]);
+                    if (p == null) {
                         sender.sendMessage(new TextComponent(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Gebe einen richtigen Spieler an!")));
                         return;
                     }
-                    PlayerData playerdata = new PlayerData(ut);
+                    PlayerData playerdata = new PlayerData(p.getName());
                     lastIP = playerdata.getLastip();
                     if (lastIP == null || lastIP == "") {
                         sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler war noch nie auf dem Netzwerk!"));
@@ -53,40 +54,43 @@ public class AccountCommand extends Command {
                     }
                 } else
                     lastIP = args[0];
+                String[] lastIPSplit = lastIP.split("\\.");
+                if (lastIPSplit.length >= 3) {
+                    try {
+                        //Split
 
-                try {
-                    //Split
-                    String[] lastIPSplit = lastIP.split("\\.");
-                    lastIP = lastIPSplit[0] + "." + lastIPSplit[1] + "." + lastIPSplit[2];
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Bitte verwende eine richtige IP (XXX.XXX.XXX)"));
-                    return;
-                }
+                        lastIP = lastIPSplit[0] + "." + lastIPSplit[1] + "." + lastIPSplit[2];
 
-                int count = 0;
-                try (Connection conn = MegaCord.getInstance().getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement("SELECT * FROM playerdata WHERE lastIP LIKE '%" + lastIP + "%'");) {
-                    ResultSet rs = ps.executeQuery();
-                    sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.normal + "Accounts von " + MegaCord.herH + args[0]));
-                    while (rs.next()) {
-                        TextComponent tc = new TextComponent();
-                        String name = rs.getString("Name");
-                        if (!name.equalsIgnoreCase(args[0])) {
-                            tc.setText(MegaCord.Prefix + MegaCord.herH + name);
-                            tc.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/ban " + name + " "));
-                            tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(MegaCord.fehler + name + MegaCord.normal + " bannen?")));
-                            if (sender instanceof ProxiedPlayer) {
-                                sender.sendMessage(tc);
-                                count++;
-                            } else
-                                sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.herH + name));
-                        }
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Bitte verwende eine richtige IP (XXX.XXX.XXX)"));
+                        return;
                     }
-                } catch (SQLException e) {
-                    MegaCord.logger().log(Level.WARNING, "could not read account data", e);
+
+                    int count = 0;
+                    try (Connection conn = MegaCord.getInstance().getDataSource().getConnection(); PreparedStatement ps = conn.prepareStatement("SELECT * FROM playerdata WHERE lastIP LIKE '%" + lastIP + "%'");) {
+                        ResultSet rs = ps.executeQuery();
+                        sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.normal + "Accounts von " + MegaCord.herH + args[0]));
+                        while (rs.next()) {
+                            TextComponent tc = new TextComponent();
+                            String name = rs.getString("Name");
+                            if (!name.equalsIgnoreCase(args[0])) {
+                                tc.setText(MegaCord.Prefix + MegaCord.herH + name);
+                                tc.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/ban " + name + " "));
+                                tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(MegaCord.fehler + name + MegaCord.normal + " bannen?")));
+                                if (sender instanceof ProxiedPlayer) {
+                                    sender.sendMessage(tc);
+                                    count++;
+                                } else
+                                    sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.herH + name));
+                            }
+                        }
+                    } catch (SQLException e) {
+                        MegaCord.logger().log(Level.WARNING, "could not read account data", e);
+                    }
+                    if (count <= 0)
+                        sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Keine Alt Accounts gefunden!"));
                 }
-                if (count <= 0)
-                    sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Keine Alt Accounts gefunden!"));
-            } else {
+            }  else {
                 sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Nutzung: /alts (Spielername/IP)"));
             }
         } else

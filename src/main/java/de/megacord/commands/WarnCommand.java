@@ -44,14 +44,14 @@ public class WarnCommand extends Command {
                     for (int i = 1; i < args.length; i++) {
                         grund = grund + args[i] + " ";
                     }
-                    WarnManager warnManager = new WarnManager(pt.getUniqueId(), pp.getUniqueId(), grund, System.currentTimeMillis(), Config.settings, MegaCord.getInstance().getDataSource());
+                    WarnManager warnManager = new WarnManager(pt.getName(), pp.getName(), grund, System.currentTimeMillis(), Config.settings, MegaCord.getInstance().getDataSource());
                     warnManager.addWarn();
                     pp.sendMessage(new TextComponent(MegaCord.Prefix + "Du hast " + MegaCord.herH + args[0] + MegaCord.normal + " für " + MegaCord.herH + grund + MegaCord.normal + " gewanrt!"));
                     int maxWarns = Config.settings.getInt("Warns.MaxWarns");
                     ArrayList<String> warnArray = new ArrayList<>();
                     final int[] i = {1};
                     String finalGrund = grund;
-                    DBUtil.getWhatCount(MegaCord.getInstance().getDataSource(), pt.getUniqueId(), "warn", true).whenComplete((whatCountTarget, ex) -> {
+                    DBUtil.getWhatCount(MegaCord.getInstance().getDataSource(), pt.getName(), "warn", true).whenComplete((whatCountTarget, ex) -> {
                         while (true) {
                             try {
                                 String line = ChatColor.translateAlternateColorCodes('&', Config.settings.getString("WarnMessage.line" + i[0])).replace("%warnCount%", String.valueOf(whatCountTarget)).replace("%maxWarns%", String.valueOf(maxWarns)).replace("%grund%", finalGrund);
@@ -65,7 +65,7 @@ public class WarnCommand extends Command {
                         }
                         pt.disconnect(new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', String.join("\n", warnArray))).create());
                         if (whatCountTarget >= maxWarns) {
-                            new BanUtils(pt.getUniqueId(), null, MegaCord.getInstance().getDataSource(), Config.settings, Config.standardBans).banByStandard(3, pt.getSocketAddress().toString().replace("/", "").split(":")[0]);
+                            new BanUtils(pt.getUniqueId().toString(), null, MegaCord.getInstance().getDataSource(), Config.settings, Config.standardBans).banByStandard(3, pt.getSocketAddress().toString().replace("/", "").split(":")[0]);
                             warnManager.deleteAllWarns();
                             pt.disconnect(new TextComponent(Config.settings.getString("BanDisconnected").replace("%absatz%", "\n").replace("%reason%", finalGrund)));
                             pp.sendMessage(new TextComponent(MegaCord.Prefix + "Der Spieler wurde, für mehr als " + MegaCord.herH + maxWarns + MegaCord.normal + " Warnungen, gebannt!"));

@@ -96,12 +96,12 @@ public class ChatListener implements Listener {
                                 e.setCancelled(true); // Onlin(ez)eit wird blockiert!
                                 pp.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Achte auf deine Wortwahl!"));
                                 if (settings.getBoolean("Blacklist.direkterBan")) {
-                                    new BanUtils(pp.getUniqueId(), null, source, settings, standardBans).banByStandard(2, e.getSender().getSocketAddress().toString().replace("/", "").split(":")[0]);
+                                    new BanUtils(pp.getUniqueId().toString(), null, source, settings, standardBans).banByStandard(2, e.getSender().getSocketAddress().toString().replace("/", "").split(":")[0]);
                                 } else {
                                     int maxWarns = settings.getInt("Warns.MaxWarns");
                                     ArrayList<String> warnArray = new ArrayList<>();
                                     AtomicInteger i = new AtomicInteger(1);
-                                    DBUtil.getWhatCount(source, pp.getUniqueId(), "warn", true).whenComplete((whatCount, ex) -> {
+                                    DBUtil.getWhatCount(source, pp.getName(), "warn", true).whenComplete((whatCount, ex) -> {
                                         while (true) {
                                             try {
                                                 String line = ChatColor.translateAlternateColorCodes('&', settings.getString("WarnMessage.line" + i)).replace("%warnCount%", String.valueOf(whatCount + 1)).replace("%maxWarns%", String.valueOf(maxWarns)).replace("%grund%", "Wortwahl (" + badWord + ")");
@@ -113,11 +113,11 @@ public class ChatListener implements Listener {
                                                 break;
                                             }
                                         }
-                                        WarnManager warnManager = new WarnManager(pp.getUniqueId(), UUIDFetcher.getUUID("PLUGIN"), "Wortwahl (" + badWord + ")", System.currentTimeMillis(), settings, source);
+                                        WarnManager warnManager = new WarnManager(pp.getName(), "PLUGIN", "Wortwahl (" + badWord + ")", System.currentTimeMillis(), settings, source);
                                         warnManager.addWarn();
                                         pp.disconnect(new TextComponent(ChatColor.translateAlternateColorCodes('&', String.join("\n", warnArray))));
                                         if (whatCount >= maxWarns) {
-                                            new BanUtils(pp.getUniqueId(), null, source, settings, standardBans).banByStandard(2, e.getSender().getSocketAddress().toString().replace("/", "").split(":")[0]);
+                                            new BanUtils(pp.getUniqueId().toString(), null, source, settings, standardBans).banByStandard(2, e.getSender().getSocketAddress().toString().replace("/", "").split(":")[0]);
                                             warnManager.deleteAllWarns();
                                             pp.disconnect(new TextComponent(settings.getString("BanDisconnected").replace("%absatz%", "\n").replace("%reason%", "Wortwahl (" + badWord + ")")));
                                             pp.sendMessage(new TextComponent(MegaCord.Prefix + "Der Spieler wurde, für mehr als " + MegaCord.herH + maxWarns + MegaCord.normal + " Warnungen, gebannt!"));
@@ -125,7 +125,7 @@ public class ChatListener implements Listener {
                                     });
                                 }
                                 for (final ProxiedPlayer current : ProxyServer.getInstance().getPlayers()) {
-                                    if (current.hasPermission("bungeecord.blackWords.info") || current.hasPermission("bungeecord.*")) {
+                                    if (current.hasPermission("megacord.blackWords.info") || current.hasPermission("megacord.*")) {
                                         TextComponent tc = new TextComponent();
                                         tc.setText(MegaCord.Prefix + MegaCord.herH + pp.getName() + MegaCord.normal + " schreibt böse Sachen: ");
 
@@ -145,8 +145,8 @@ public class ChatListener implements Listener {
             }
         final boolean[] retrun = new boolean[1];
         if (e.getSender() instanceof ProxiedPlayer) {
-            BanUtils ban = new BanUtils(((ProxiedPlayer) e.getSender()).getUniqueId(), e.getSender().getSocketAddress().toString().replace("/", "").split(":")[0], source, settings, standardBans);
-            ban.isBanned().whenComplete((result, ex) -> {
+            BanUtils ban = new BanUtils(((ProxiedPlayer) e.getSender()).getUniqueId().toString(), e.getSender().getSocketAddress().toString().replace("/", "").split(":")[0], source, settings, standardBans);
+            ban.isBanned(pp.getName()).whenComplete((result, ex) -> {
                 if (result) {
                     ban.containsIP().whenComplete((ipResult, exception) -> {
                         if (ban.getBan() == 0 || ipResult == 0) {

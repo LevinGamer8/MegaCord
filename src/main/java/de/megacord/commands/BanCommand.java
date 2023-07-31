@@ -1,7 +1,9 @@
 package de.megacord.commands;
 
 import de.megacord.MegaCord;
-import de.megacord.utils.*;
+import de.megacord.utils.BanUtils;
+import de.megacord.utils.Config;
+import de.megacord.utils.DateUnit;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
@@ -9,10 +11,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class BanCommand extends Command {
@@ -32,121 +31,14 @@ public class BanCommand extends Command {
         if (sender.hasPermission("megacord.punish.ban") || sender.hasPermission("megacord.*")) {
             if (args.length == 2 || args.length == 3) {
 
-                UUID ptUUID = UUIDFetcher.getUUID(args[0]);
-                String targetName = args[0];
-
-                if (ProxyServer.getInstance().getPlayer(args[0]) == null) {
-
-                    if (UUIDFetcher.getName(ptUUID) == null) {
-                        PlayerData playerData = new PlayerData(ptUUID);
-                        try {
-                            if(playerData.isSavedBedrockPlayer(ptUUID)) {
-                                ptUUID = playerData.getSavedBedrockUUID(args[0]);
-                                targetName = playerData.getSavedBedrockUsername(ptUUID);
-
-                                BanUtils currentBan = new BanUtils(ptUUID, null, MegaCord.getInstance().getDataSource(), Config.settings, Config.standardBans);
-                                UUID finalPtUUID = ptUUID;
-                                currentBan.isBanned().whenComplete((result, ex) -> {
-                                    int banid = 0;
-                                    try {
-                                        banid = Integer.parseInt(args[1]);
-                                    } catch (NumberFormatException e) {
-                                        sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Gebe eine Zahl ein!"));
-                                        return;
-                                    }
-                                    String grund = Config.ban.getString("BanIDs." + banid + ".Reason");
-
-                                    int finalBanid = banid;
-                                    currentBan.getBanCount(grund, true).whenComplete((banCountResult, exception) -> {
-                                        if (!Config.ban.getSection("BanIDs").contains(finalBanid + "")) {
-                                            sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Diese ID existiert nicht!"));
-                                            return;
-                                        }
-                                        String banIdPerm = Config.ban.getString("BanIDs." + finalBanid + ".Permission");
-                                        if (!banIdPerm.equals("")) {
-                                            if (!sender.hasPermission("megacord.*")) {
-                                                if (!sender.hasPermission(banIdPerm)) {
-                                                    sender.sendMessage(new TextComponent(MegaCord.noPerm + MegaCord.other2 + " (" + MegaCord.herH + banIdPerm + MegaCord.other2 + ")"));
-                                                    return;
-                                                }
-                                            }
-                                        }
-
-                                        boolean perma = Config.ban.getBoolean("BanIDs." + finalBanid + ".Perma");
-                                        boolean ban = Config.ban.getBoolean("BanIDs." + finalBanid + ".Ban");
-                                        int permaint = 0;
-                                        int banint = 0;
-                                        if (perma) {
-                                            permaint = 1;
-                                        }
-                                        if (ban) {
-                                            banint = 1;
-                                        }
-                                        if (result) {
-                                            if (currentBan.getBan() == 1 && !ban) {
-                                                sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Wenn der Spieler gebannt ist bringt ein Mute auch nichts mehr!"));
-                                                return;
-                                            }
-                                            currentBan.unban(false, "PLUGIN"); // erstmal //
-                                            // hier abfragen, ob er den aktuellen Ban verändern will?
-                                        }
-                                        DateUnit unit;
-                                        try {
-                                            unit = DateUnit.valueOf((Config.ban.getString("BanIDs." + finalBanid + ".Format")).toUpperCase());
-                                        } catch (IllegalArgumentException | NullPointerException e) {
-                                            sender.sendMessage(new TextComponent(MegaCord.herH + (Config.ban.getString("BanIDs." + finalBanid + ".Format")) + MegaCord.fehler + " ist keine gültiges Format!"));
-                                            sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.normal + "Gültige Einheiten: "));
-                                            for (DateUnit date : DateUnit.values()) {
-                                                sender.sendMessage(new TextComponent(MegaCord.herH + date));
-                                            }
-                                            return;
-                                        }
-                                        long current = System.currentTimeMillis();
-                                        int time = Config.ban.getInt("BanIDs." + finalBanid + ".Time");
-
-                                        int banCount = (banCountResult + 1);
-                                        long millis = 0;
-                                        double y = 0;
-
-                                        if (Config.settings.getBoolean("Ban.permaafter3")) {
-                                            if (banCount > 3)
-                                                permaint = 1;
-                                        }
-                                        double pow = Math.pow(2, banCount);
-                                        y = time * pow;
-                                        if (banCount == 1)
-                                            y = y - time;
-                                        millis = Math.round(y * (unit.getToSec() * 1000));
-
-                                        long unban = current + millis;
-                                        if (permaint == 1)
-                                            unban = -1;
-                                        String beweis = "/";
-                                        if (args.length == 3) {
-                                            beweis = args[2];
-                                        }
-                                        ProxiedPlayer target = ProxyServer.getInstance().getPlayer(finalPtUUID);
-                                        new BanUtils(finalPtUUID, sender.getName(), grund, System.currentTimeMillis(), unban, permaint, banint, target != null ? target.getSocketAddress().toString() : "NULL", beweis, MegaCord.getInstance().getDataSource(), Config.settings, Config.standardBans);
-                                    });
-                                });
-
-
-
-                            }
-                        } catch (SQLException e) {
-                            throw new RuntimeException(e);
-                        } catch (ExecutionException e) {
-                            throw new RuntimeException(e);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-
+                if (args[0] == null) {
+                    return;
                 }
 
-                BanUtils currentBan = new BanUtils(ptUUID, null, MegaCord.getInstance().getDataSource(), Config.settings, Config.standardBans);
-                UUID finalPtUUID = ptUUID;
-                currentBan.isBanned().whenComplete((result, ex) -> {
+                String targetName = args[0];
+                sender.sendMessage(args[0]);
+                BanUtils currentBan = new BanUtils(targetName, null, MegaCord.getInstance().getDataSource(), Config.settings, Config.standardBans);
+                currentBan.isBanned(targetName).whenComplete((result, ex) -> {
                     int banid = 0;
                     try {
                         banid = Integer.parseInt(args[1]);
@@ -225,8 +117,8 @@ public class BanCommand extends Command {
                         if (args.length == 3) {
                             beweis = args[2];
                         }
-                        ProxiedPlayer target = ProxyServer.getInstance().getPlayer(finalPtUUID);
-                        new BanUtils(finalPtUUID, sender.getName(), grund, System.currentTimeMillis(), unban, permaint, banint, target != null ? target.getSocketAddress().toString() : "NULL", beweis, MegaCord.getInstance().getDataSource(), Config.settings, Config.standardBans);
+                        ProxiedPlayer target = ProxyServer.getInstance().getPlayer(targetName);
+                        new BanUtils(targetName, sender.getName(), grund, System.currentTimeMillis(), unban, permaint, banint, target != null ? target.getSocketAddress().toString() : "NULL", beweis, MegaCord.getInstance().getDataSource(), Config.settings, Config.standardBans);
                     });
                 });
             } else {

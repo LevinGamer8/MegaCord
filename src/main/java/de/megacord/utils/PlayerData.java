@@ -3,20 +3,16 @@ package de.megacord.utils;
 import de.megacord.MegaCord;
 
 import javax.sql.DataSource;
-import java.net.SocketAddress;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 public class PlayerData {
 
-    private UUID uuid;
     private String name;
     private String firstip;
     private String lastip;
@@ -32,19 +28,12 @@ public class PlayerData {
     Map<String, Integer> ipOnlinePlayers = new HashMap<>();
     private DataSource source;
 
-    public PlayerData(UUID uuid) {
-        this.uuid = uuid;
+    public PlayerData(String name) {
         this.source = MegaCord.getInstance().getDataSource();
         loadData();
     }
 
-    public UUID getUuid() {
-        return uuid;
-    }
 
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
-    }
 
     public String getName() {
         return name;
@@ -129,11 +118,10 @@ public class PlayerData {
 
     public void loadData() {
         try (Connection conn = source.getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT * FROM playerdata WHERE UUID = ?")) {
-            ps.setString(1, getUuid().toString());
+             PreparedStatement ps = conn.prepareStatement("SELECT * FROM playerdata WHERE Name = ?")) {
+            ps.setString(1, getName());
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                setName(rs.getString("Name"));
                 setFirstip(rs.getString("firstIP"));
                 setLastip(rs.getString("lastIP"));
                 setFirstjoin(rs.getLong("firstJoin"));
@@ -152,27 +140,43 @@ public class PlayerData {
     }
 
 
-    public void createPlayer(UUID target, String ip, String name) {
-        setUuid(target);
+    public void createPlayer(String ip, String name) {
         setName(name);
-        try (Connection conn = source.getConnection(); PreparedStatement ps = conn.prepareStatement("INSERT INTO playerdata (UUID,Name,firstIP,lastIP,firstJoin,lastOnline,bansMade,warnsMade,reportsMade,bansReceive,warnsReceive,maxIP,ipOnlinePlayers) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE UUID=UUID")) {
-            ps.setString(1, getUuid().toString()); // uuid
-            ps.setString(2, getName()); // name
-            ps.setString(3, ip.replace("/", "").split(":")[0]);
-            ps.setString(4, ip == null ? null : ip.replace("/", "").split(":")[0]); // lastIP
-            ps.setLong(5, System.currentTimeMillis()); // firstJoin
-            ps.setLong(6, -1); // lastOnline
-            ps.setInt(7, 0); // bansMade
-            ps.setInt(8, 0); // warnsMade
-            ps.setInt(9, 0); // reportsMade
-            ps.setInt(10, 0); //  bansReceived
-            ps.setInt(11, 0); // warnsReceived
-            ps.setInt(12, 1); //maxAccountPerIP
-            ps.setInt(13, 0); //ipOnlinePlayers
+        if (exists(name)) {
+            updatePlayerData("lastip", ip);
+            return;
+        }
+        try (Connection conn = source.getConnection(); PreparedStatement ps = conn.prepareStatement("INSERT INTO playerdata (Name,firstIP,lastIP,firstJoin,lastOnline,bansMade,warnsMade,reportsMade,bansReceive,warnsReceive,maxIP,ipOnlinePlayers) VALUES(?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE Name=Name")) {
+            ps.setString(1, getName()); // name
+            ps.setString(2, ip.replace("/", "").split(":")[0]);
+            ps.setString(3, ip == null ? null : ip.replace("/", "").split(":")[0]); // lastIP
+            ps.setLong(4, System.currentTimeMillis()); // firstJoin
+            ps.setLong(5, -1); // lastOnline
+            ps.setInt(6, 0); // bansMade
+            ps.setInt(7, 0); // warnsMade
+            ps.setInt(8, 0); // reportsMade
+            ps.setInt(9, 0); //  bansReceived
+            ps.setInt(10, 0); // warnsReceived
+            ps.setInt(11, 1); //maxAccountPerIP
+            ps.setInt(12, 0); //ipOnlinePlayers
             ps.executeUpdate();
         } catch (SQLException e) {
             MegaCord.logger().log(Level.WARNING, "could not create playerdata", e);
         }
+    }
+
+    public boolean exists(String name) {
+        try (Connection conn = source.getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT * FROM playerdata WHERE Name = ?" )) {
+            ps.setString(1, this.getName());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return true;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return false;
     }
 
     public void updatePlayerData(String what, String ip) {
@@ -198,67 +202,15 @@ public class PlayerData {
                 break;
         }
 
-        try (Connection conn = source.getConnection(); PreparedStatement ps = conn.prepareStatement("UPDATE playerdata SET " + what + " = ? WHERE UUID = ?")) {
+        try (Connection conn = source.getConnection(); PreparedStatement ps = conn.prepareStatement("UPDATE playerdata SET " + what + " = ? WHERE Name = ?")) {
             ps.setString(1, value);
-            ps.setString(2, this.getUuid().toString());
+            ps.setString(2, this.getName());
             ps.executeUpdate();
         } catch (SQLException e) {
             MegaCord.logger().log(Level.WARNING, "could not update playerdata", e);
         }
     }
 
-    public void saveBedrockUser(UUID uuid, String username) throws SQLException {
-        try (Connection conn = source.getConnection(); PreparedStatement ps = conn.prepareStatement("INSERT INTO bedrockPlayers (UUID, Name) VALUES(?,?) ON DUPLICATE KEY UPDATE UUID=UUID")) {
-            ps.setString(1, String.valueOf(uuid));
-            ps.setString(2, username);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            MegaCord.logger().log(Level.WARNING, "could not update playerdata", e);
-        }
-    }
-
-
-    public String getSavedBedrockUsername(UUID player) throws SQLException, ExecutionException, InterruptedException {
-        try (Connection conn = source.getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT * FROM bedrockPlayers WHERE UUID = " + player)) {
-            ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            return rs.getString("username");
-        }
-        return null;
-    }
-    }
-
-    public UUID getSavedBedrockUUID(String username) throws SQLException, ExecutionException, InterruptedException {
-        try (Connection conn = source.getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT * FROM bedrockPlayers WHERE username = " + username)) {
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                return UUID.fromString(rs.getString("uuid"));
-            }
-            return null;
-        }
-    }
-    public boolean isSavedBedrockPlayer(UUID player) throws SQLException, ExecutionException, InterruptedException {
-        try (Connection conn = source.getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT * FROM bedrockPlayers WHERE uuid = ?")) {
-            ps.setString(1, player.toString());
-            ResultSet rs = ps.executeQuery();
-            return rs.next();
-        }
-    }
-
-    public boolean isSavedBedrockPlayer(String username) throws SQLException, ExecutionException, InterruptedException {
-            try (Connection conn = source.getConnection();
-                 PreparedStatement ps = conn.prepareStatement("SELECT * FROM bedrockPlayers WHERE username = ?" )) {
-                ps.setString(1, username);
-                ResultSet rs = ps.executeQuery();
-                while (rs.next()) {
-                    return true;
-                }
-                return false;
-            }
-        }
 
     public int getMaxIP(String address) throws SQLException {
         try (Connection conn = source.getConnection();

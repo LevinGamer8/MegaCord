@@ -13,6 +13,7 @@ import net.md_5.bungee.api.plugin.Command;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -86,7 +87,7 @@ public class OnlineZeitCommand extends Command {
                     } else if (args[0].equalsIgnoreCase("trend")) {// /onlinezeit trend
                         if (sender.hasPermission("megacord.onlinezeit.trend.own") || sender.hasPermission("megacord.*") || sender.hasPermission("megacord.onlinezeit.*")) {
                             if (sender instanceof ProxiedPlayer) {
-                                onlinezeit.sendTrend(UUIDFetcher.getUUID(sender.getName()), 7, false);
+                                onlinezeit.sendTrend(sender.getName(), 7, false);
                             } else
                                 sender.sendMessage(new TextComponent(MegaCord.Prefix + "Du bist doch eh die ganze Zeit online :)"));
                         } else
@@ -136,7 +137,7 @@ public class OnlineZeitCommand extends Command {
                 } else if (args[0].equalsIgnoreCase("trend")) { // /onlinezeit trend <Tage> ODER /onlinezeit trend <Spieler>
                     try { // /onlinezeit trend <Tage>
                         if (sender.hasPermission("megacord.onlinezeit.trend.own.days") || sender.hasPermission("megacord.*") || sender.hasPermission("megacord.onlinezeit.*")) {
-                            onlinezeit.sendTrend(UUIDFetcher.getUUID(sender.getName()), Integer.parseInt(args[1]), !(sender instanceof ProxiedPlayer));
+                            onlinezeit.sendTrend(sender.getName(), Integer.parseInt(args[1]), !(sender instanceof ProxiedPlayer));
                         }
                         return;
                     } catch (NumberFormatException e) { // /onlinezeit trend <Spieler>
@@ -145,7 +146,7 @@ public class OnlineZeitCommand extends Command {
                                 sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler existiert nicht!"));
                                 return;
                             }
-                            onlinezeit.sendTrend(UUIDFetcher.getUUID(args[1]), 7, !(sender instanceof ProxiedPlayer));
+                            onlinezeit.sendTrend(args[1], 7, !(sender instanceof ProxiedPlayer));
                         }
                         return;
                     }
@@ -196,7 +197,7 @@ public class OnlineZeitCommand extends Command {
                             return;
                         }
                         try {
-                            onlinezeit.sendTrend(UUIDFetcher.getUUID(args[1]), Integer.parseInt(args[2]), !(sender instanceof ProxiedPlayer));
+                            onlinezeit.sendTrend(args[1], Integer.parseInt(args[2]), !(sender instanceof ProxiedPlayer));
                             return;
                         } catch (NumberFormatException e) {
                             sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Die Tage müssen als Zahl angegeben sein! (Deins: "+args[2]+")"));

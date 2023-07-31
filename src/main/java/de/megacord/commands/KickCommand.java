@@ -42,7 +42,7 @@ public class KickCommand extends Command {
             player.disconnect(new TextComponent("§8-------------------------------\n\n §3§lMegaCraft §e§lNetzwerk§r\n\n§4Du wurdest §4§lgekickt§!§r\n\n§bGrund §8» §c" + grund + "\n\n§8-------------------------------"));
 
                 HistoryManager historyManager = new HistoryManager();
-                historyManager.insertInDB(player.getUniqueId(), UUIDFetcher.getUUID(sender.getName()), "kick", grund, Long.parseLong("0"), Long.parseLong("0"), 0, 0);
+                historyManager.insertInDB(playerName, sender.getName(), "kick", grund, Long.parseLong("0"), Long.parseLong("0"), 0, 0);
                     for (ProxiedPlayer team : ProxyServer.getInstance().getPlayers()) {
                         if (team.hasPermission("megacord.punish.notify")) {
                             team.sendMessage(new TextComponent(ChatColor.GRAY + "Der " + ChatColor.GOLD + "Spieler " + ChatColor.DARK_RED + playerName + " §7wurde für §c" + grund + " §4gekicktt!"));

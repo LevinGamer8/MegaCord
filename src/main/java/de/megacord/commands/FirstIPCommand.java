@@ -34,7 +34,7 @@ public class FirstIPCommand extends Command {
                 sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler existiert nicht!"));
                 return;
             }
-            String ip = new PlayerData(uuid).getFirstip();
+            String ip = new PlayerData(uuid.toString()).getFirstip();
             if (ip == null || ip.equals("")) {
                 sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.herH + args[0] + MegaCord.fehler + " war noch nie auf dem Netzwerk!"));
                 return;

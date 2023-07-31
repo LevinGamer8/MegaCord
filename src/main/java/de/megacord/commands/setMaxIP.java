@@ -32,7 +32,7 @@ public class setMaxIP extends Command {
 
         ProxiedPlayer p = (ProxiedPlayer) sender;
 
-        PlayerData pl = new PlayerData(p.getUniqueId());
+        PlayerData pl = new PlayerData(p.getUniqueId().toString());
         try {
             pl.setMaxIP(args[0], Integer.parseInt(args[1]));
         } catch (SQLException e) {

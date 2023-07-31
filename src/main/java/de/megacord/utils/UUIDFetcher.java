@@ -13,16 +13,13 @@ import java.util.function.Consumer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.geysermc.floodgate.api.FloodgateApi;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class UUIDFetcher {
 
-    /**
-     * Date when name changes were introduced
-     *
-     * @see UUIDFetcher#getUUIDAt(String, long)
-     */
+
     public static final long FEBRUARY_2015 = 1422748800000L;
 
     private static Gson gson = new GsonBuilder().registerTypeAdapter(UUID.class, new UUIDTypeAdapter()).create();
@@ -45,7 +42,7 @@ public class UUIDFetcher {
      * @param action Do what you want to do with the uuid her
      */
     public static void getUUID(String name, Consumer<UUID> action) {
-        UUIDFetcher.pool.execute(() -> action.accept(UUIDFetcher.getUUID(name)));
+        UUIDFetcher.pool.execute(() -> action.accept(UUID.fromString(UUIDFetcher.getUUID(name))));
     }
 
     /**
@@ -54,20 +51,13 @@ public class UUIDFetcher {
      * @param name The name
      * @return The uuid
      */
-    public static UUID getUUID(String name) {
-        return UUIDFetcher.getUUIDAt(name, System.currentTimeMillis());
-    }
-
-    /**
-     * Fetches the uuid synchronously for a specified name and time and passes the
-     * result to the consumer
-     *
-     * @param name      The name
-     * @param timestamp Time when the player had this name in milliseconds
-     * @param action    Do what you want to do with the uuid her
-     */
-    public static void getUUIDAt(String name, long timestamp, Consumer<UUID> action) {
-        UUIDFetcher.pool.execute(() -> action.accept(UUIDFetcher.getUUIDAt(name, timestamp)));
+    public static String getUUID(String name) {
+        if (name.startsWith(".")) {
+            name = name.replace(".", "");
+            return String.valueOf(FloodgateApi.getInstance().getUuidFor(name));
+        } else {
+            return UUIDFetcher.getUUIDAt(name, System.currentTimeMillis());
+        }
     }
 
     /**
@@ -77,10 +67,17 @@ public class UUIDFetcher {
      * @param timestamp Time when the player had this name in milliseconds
      * @see UUIDFetcher#FEBRUARY_2015
      */
-    public static UUID getUUIDAt(String name, long timestamp) {
+    public static String getUUIDAt(String name, long timestamp) {
+
+
+        if (name.startsWith(".")) {
+            return String.format(String.valueOf(FloodgateApi.getInstance().getUuidFor(name)));
+        } else {
+
+
         name = name.toLowerCase();
         if (UUIDFetcher.uuidCache.containsKey(name)) {
-            return UUIDFetcher.uuidCache.get(name);
+            return String.valueOf(UUIDFetcher.uuidCache.get(name));
         }
         try {
             final HttpURLConnection connection = (HttpURLConnection) new URL(
@@ -92,10 +89,12 @@ public class UUIDFetcher {
             UUIDFetcher.uuidCache.put(name, data.id);
             UUIDFetcher.nameCache.put(data.id, data.name);
 
-            return data.id;
+            return String.valueOf(data.id);
         } catch (final Exception e) {
         }
+    }
         return null;
+
     }
 
     /**

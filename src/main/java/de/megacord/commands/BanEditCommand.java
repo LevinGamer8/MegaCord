@@ -5,6 +5,7 @@ import de.megacord.utils.BanUtils;
 import de.megacord.utils.Config;
 import de.megacord.utils.UUIDFetcher;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
@@ -30,14 +31,10 @@ public class BanEditCommand extends Command {
                 return;
             }
             if (args.length >= 2) {
-                UUID ut = UUIDFetcher.getUUID(args[0]);
-                if (ut == null) {
-                    sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler existiert nicht!"));
-                    return;
-                }
-                BanUtils ban = new BanUtils(ut, null, MegaCord.getInstance().getDataSource(), Config.settings, Config.standardBans);
+                ProxiedPlayer p = ProxyServer.getInstance().getPlayer(args[0]);
+                BanUtils ban = new BanUtils(p.getName(), null, MegaCord.getInstance().getDataSource(), Config.settings, Config.standardBans);
                 final boolean[] retrun = new boolean[1];
-                ban.isBanned().whenComplete((result, ex) -> {
+                ban.isBanned(p.getName()).whenComplete((result, ex) -> {
                     if(!result) {
                         sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Der Spieler " + MegaCord.herH + args[0] + MegaCord.fehler + " ist nicht gebannt!"));
                         retrun[0] = true;

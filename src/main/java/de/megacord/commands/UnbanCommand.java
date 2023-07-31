@@ -1,44 +1,43 @@
 package de.megacord.commands;
 
 import de.megacord.MegaCord;
-import de.megacord.utils.BanUtils;
-import de.megacord.utils.Config;
-import de.megacord.utils.UUIDFetcher;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
-import java.util.UUID;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
 
 public class UnbanCommand extends Command {
 
-    public UnbanCommand() {
+    private DataSource source;
+    public UnbanCommand(DataSource source) {
         super("unban", "megacord.punish.unban", "unmute");
+        this.source = source;
     }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (sender.hasPermission("megacord.punish.unban") || sender.hasPermission("megacord.*")) {
             if (args.length == 1) {
-                UUID pt = UUIDFetcher.getUUID(args[0]);
-                if (pt == null) {
-                    sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler existiert nicht!"));
-                    return;
+                try (Connection conn = getSource().getConnection(); PreparedStatement ps = conn.prepareStatement("DELETE FROM bannedPlayers WHERE TargetName = ?")) {
+                    ps.setString(1, args[0]);
+                    ps.executeUpdate();
+                } catch (SQLException e) {
+                    MegaCord.logger().log(Level.WARNING, "could not delete player from bannedplayer-Table", e);
                 }
-                BanUtils ban = new BanUtils(pt, null, MegaCord.getInstance().getDataSource(), Config.settings, Config.standardBans);
-                ban.isBanned().whenComplete((bannedResult, exception) -> {
-                    if (bannedResult) {
-                        ban.unban(true, sender instanceof ProxiedPlayer ? sender.getName() : "CONSOLE").whenComplete((result, ex) -> {
-                            if (!result)
-                                sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Ein Fehler ist aufgetreten!"));
-                        });
-                    } else
-                        sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler ist nicht gebannt!"));
-                });
             }
         } else
             sender.sendMessage(new TextComponent(MegaCord.noPerm));
+    }
+
+    public DataSource getSource() {
+        return source;
     }
 
 }

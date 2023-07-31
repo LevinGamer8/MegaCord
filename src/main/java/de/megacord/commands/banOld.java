@@ -99,7 +99,7 @@ public class banOld extends Command {
             String playerName = args[0];
             String durationString = args[1];
             UUID uuid = null;
-            uuid = UUIDFetcher.getUUID(playerName);
+            uuid = UUID.fromString(UUIDFetcher.getUUID(playerName));
             String grund = args[2];
 
             long dauer;

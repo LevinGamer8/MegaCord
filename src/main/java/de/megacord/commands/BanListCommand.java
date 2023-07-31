@@ -46,9 +46,8 @@ public class BanListCommand extends Command {
 
     private void sendHelp(int seite, ProxiedPlayer pp, String targetName) {
 
-        UUID uuid = UUIDFetcher.getUUID(targetName);
         int zeilen = 10;
-        DBUtil.getWhatCount(MegaCord.getInstance().getDataSource(), uuid, "ban", true).whenComplete((result, ex) -> {
+        DBUtil.getWhatCount(MegaCord.getInstance().getDataSource(), targetName, "ban", true).whenComplete((result, ex) -> {
             int allReports = result;
             int allPages = allReports / zeilen;
             int eineSeitePlus = seite + 1;
@@ -65,13 +64,13 @@ public class BanListCommand extends Command {
             pp.sendMessage(new TextComponent(MegaCord.normal + "Bans von " + MegaCord.herH + targetName + " " + MegaCord.other2 + "(" + MegaCord.herH + seite + MegaCord.other2 + "/" + MegaCord.herH + allPages + MegaCord.other2 + ")"));
 
             HistoryManager historyManager = new HistoryManager();
-            List<HistoryElement> bans = historyManager.readHistory(uuid, zeilen, seite, "ban", false);
+            List<HistoryElement> bans = historyManager.readHistory(targetName, zeilen, seite, "ban", false);
             for (HistoryElement ban : bans) {
                 TextComponent tc = new TextComponent();
                 tc.setText(MegaCord.Prefix);
 
                 TextComponent tc1 = new TextComponent();
-                tc1.setText(MegaCord.normal + ChatColor.translateAlternateColorCodes('&', Config.settings.getString("Bans.Message").replace("%grund%", ban.getGrund()).replace("%wer%", UUIDFetcher.getName(ban.getTargetUUID())).replace("%von%", UUIDFetcher.getName(ban.getVonUUID())).replace("%time%", MegaCord.formatTime(ban.getErstellt())).replace("%bis%", ban.getPerma() == 1 ? "Permanent" : MegaCord.formatTime(ban.getBis())).replace("%status%", ban.getBan() == 1 ? "Ban" : "Mute").replace("%aktiv%", (ban.getVonEntbannt() == null) ? MegaCord.normal + "✔" : MegaCord.fehler + "✖").replace("%entbanner%", ban.getVonEntbannt() == null ? "Keiner" : ban.getVonEntbannt())));
+                tc1.setText(MegaCord.normal + ChatColor.translateAlternateColorCodes('&', Config.settings.getString("Bans.Message").replace("%grund%", ban.getGrund()).replace("%wer%", ban.getTargetName().replace("%von%", ban.getVonName()).replace("%time%", MegaCord.formatTime(ban.getErstellt())).replace("%bis%", ban.getPerma() == 1 ? "Permanent" : MegaCord.formatTime(ban.getBis())).replace("%status%", ban.getBan() == 1 ? "Ban" : "Mute").replace("%aktiv%", (ban.getVonEntbannt() == null) ? MegaCord.normal + "✔" : MegaCord.fehler + "✖").replace("%entbanner%", ban.getVonEntbannt() == null ? "Keiner" : ban.getVonEntbannt()))));
                 tc.addExtra(tc1);
 
                 TextComponent tc2 = new TextComponent();
@@ -81,7 +80,7 @@ public class BanListCommand extends Command {
                 int i = 1;
                 while (true) {
                     try {
-                        String line = ChatColor.translateAlternateColorCodes('&', Config.settings.getString("Bans.hover." + i).replace("%grund%", ban.getGrund()).replace("%wer%", UUIDFetcher.getName(ban.getTargetUUID())).replace("%von%", UUIDFetcher.getName(ban.getVonUUID())).replace("%time%", MegaCord.formatTime(ban.getErstellt())).replace("%bis%", ban.getPerma() == 1 ? "Permanent" : MegaCord.formatTime(ban.getBis())).replace("%status%", ban.getBan() == 1 ? "Ban" : "Mute").replace("%aktiv%", (ban.getVonEntbannt() == null) ? MegaCord.normal + "✔" : MegaCord.fehler + "✖").replace("%entbanner%", ban.getVonEntbannt() == null ? "Keiner" : ban.getVonEntbannt()));
+                        String line = ChatColor.translateAlternateColorCodes('&', Config.settings.getString("Bans.hover." + i).replace("%grund%", ban.getGrund()).replace("%wer%", ban.getTargetName()).replace("%von%", ban.getVonName()).replace("%time%", MegaCord.formatTime(ban.getErstellt())).replace("%bis%", ban.getPerma() == 1 ? "Permanent" : MegaCord.formatTime(ban.getBis())).replace("%status%", ban.getBan() == 1 ? "Ban" : "Mute").replace("%aktiv%", (ban.getVonEntbannt() == null) ? MegaCord.normal + "✔" : MegaCord.fehler + "✖").replace("%entbanner%", ban.getVonEntbannt() == null ? "Keiner" : ban.getVonEntbannt()));
                         hoverArray.add(line);
                         i++;
                         if (i > 7)

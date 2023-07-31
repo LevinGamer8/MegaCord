@@ -1,11 +1,10 @@
 package de.megacord.utils;
 
-import java.util.UUID;
 
 public class HistoryElement {
 
-    private UUID targetUUID;
-    private UUID vonUUID;
+    private String targetName;
+    private String vonName;
     private String type;
     private String grund;
     private long erstellt;
@@ -14,9 +13,9 @@ public class HistoryElement {
     private int ban;
     private String vonEntbannt;
 
-    public HistoryElement(UUID targetUUID, UUID vonUUID, String type, String grund, long erstellt, long bis, int perma, int ban, String vonEntbannt) {
-        this.targetUUID = targetUUID;
-        this.vonUUID = vonUUID;
+    public HistoryElement(String targetName, String vonName, String type, String grund, long erstellt, long bis, int perma, int ban, String vonEntbannt) {
+        this.targetName = targetName;
+        this.vonName = vonName;
         this.type = type;
         this.grund = grund;
         this.erstellt = erstellt;
@@ -30,12 +29,12 @@ public class HistoryElement {
         return vonEntbannt;
     }
 
-    public UUID getTargetUUID() {
-        return targetUUID;
+    public String getTargetName() {
+        return targetName;
     }
 
-    public UUID getVonUUID() {
-        return vonUUID;
+    public String getVonName() {
+        return vonName;
     }
 
     public String getType() {

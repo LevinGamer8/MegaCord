@@ -44,7 +44,7 @@ public class Registry {
         pluginManager.registerCommand(plugin, new BanAddCommand());
         pluginManager.registerCommand(plugin, new BanRemoveCommand());
         pluginManager.registerCommand(plugin, new BanIDEditCommand());
-        pluginManager.registerCommand(plugin, new UnbanCommand());
+        pluginManager.registerCommand(plugin, new UnbanCommand(dataSource));
         pluginManager.registerCommand(plugin, new BanListCommand());
         pluginManager.registerCommand(plugin, new CheckCommand());
         pluginManager.registerCommand(plugin, new WarnCommand());

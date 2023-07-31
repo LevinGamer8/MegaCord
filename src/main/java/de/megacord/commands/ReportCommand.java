@@ -40,7 +40,7 @@ public class ReportCommand extends Command {
         String reportedName = args[0];
         String reason = String.join(" ", args[1]);
         UUID reportedUuid = null;
-        reportedUuid = UUIDFetcher.getUUID(reportedName);
+        reportedUuid = UUID.fromString(UUIDFetcher.getUUID(reportedName));
         if (reportedUuid == null) {
             sender.sendMessage(new TextComponent("§4Es wurde kein Spieler mit dem Namen '" + reportedName + "' gefunden."));
             return;

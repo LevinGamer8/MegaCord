@@ -32,7 +32,7 @@ public class UUIDCommand extends Command {
         if (player != null) {
             uuid = player.getUniqueId();
         } else {
-            uuid = UUIDFetcher.getUUID(args[0]);
+            uuid = UUID.fromString(UUIDFetcher.getUUID(args[0]));
             if (uuid == null) {
                 sender.sendMessage(ChatColor.RED + "Spieler nicht gefunden.");
                 return;

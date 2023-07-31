@@ -29,11 +29,11 @@ public final class DBUtil {
         return String.join(", ", list);
     }
 
-    public static CompletableFuture<Integer> getWhatCount(DataSource source, UUID player, String type, boolean where) {
+    public static CompletableFuture<Integer> getWhatCount(DataSource source, String player, String type, boolean where) {
         return CompletableFuture.supplyAsync(() -> {
             try (Connection conn = source.getConnection();
-                 PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) AS count FROM history WHERE TargetUUID = ?" + (where ? " AND Type = ?" : "") + " ORDER BY ERSTELLT DESC");) {
-                ps.setString(1, player.toString());
+                 PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) AS count FROM history WHERE TargetName = ?" + (where ? " AND Type = ?" : "") + " ORDER BY ERSTELLT DESC");) {
+                ps.setString(1, player);
                 if (where) {
                     ps.setString(2, type);
                 }

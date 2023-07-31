@@ -14,7 +14,6 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.event.EventHandler;
 import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -27,8 +26,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 public class PlayerJoinListener implements Listener {
@@ -38,9 +35,7 @@ public class PlayerJoinListener implements Listener {
     private Configuration standardBans;
     private Plugin plugin;
 
-    private HashMap<ProxiedPlayer, ProxiedPlayer> onlinePlayers = new HashMap<>();
-
-    private final HashMap<String, ImageMessage> head_cache = new HashMap<>();
+    private final HashMap<ProxiedPlayer, ProxiedPlayer> onlinePlayers = new HashMap<>();
 
     public PlayerJoinListener(Plugin plugin, DataSource source, Configuration settings, Configuration standardBans) {
         this.source = source;
@@ -51,22 +46,12 @@ public class PlayerJoinListener implements Listener {
     }
 
     @EventHandler
-    public void onLogin(LoginEvent e) throws SQLException, ExecutionException, InterruptedException {
+    public void onLogin(LoginEvent e) throws SQLException {
         PendingConnection con = e.getConnection();
-        UUID uuid = con.getUniqueId();
-        PlayerData playerData = new PlayerData(uuid);
-        if(UUIDFetcher.getName(uuid) == null && !playerData.isSavedBedrockPlayer(uuid)) {
-            if(FloodgateApi.getInstance().getPlayer(uuid) != null) {
-                FloodgatePlayer floodgatePlayer = FloodgateApi.getInstance().getPlayer(uuid);
-                playerData.saveBedrockUser(floodgatePlayer.getJavaUniqueId(), con.getName());
-                new PlayerData(uuid).createPlayer(uuid, con.getAddress().getAddress().getHostAddress(), floodgatePlayer.getJavaUsername());
-                updateIP(floodgatePlayer.getJavaUniqueId(), con.getAddress().getAddress().getHostAddress());
-            }
-        }
-            UUID target = e.getConnection().getUniqueId();
-            new PlayerData(target).createPlayer(target, e.getConnection().getSocketAddress().toString(), e.getConnection().getName());
-            BanUtils ban = new BanUtils(e.getConnection().getUniqueId(), e.getConnection().getSocketAddress().toString().replace("/", "").split(":")[0], source, settings, standardBans);
-            ban.isBanned().whenComplete((result, ex) -> {
+        String name = con.getName();
+            new PlayerData(name).createPlayer(e.getConnection().getAddress().getAddress().getHostAddress(), e.getConnection().getName());
+            BanUtils ban = new BanUtils(e.getConnection().getUniqueId().toString(), e.getConnection().getSocketAddress().toString().replace("/", "").split(":")[0], source, settings, standardBans);
+            ban.isBanned(name).whenComplete((result, ex) -> {
                 ban.containsIP().whenComplete((ipResult, exception) -> {
                     if ((result && ban.getBan() == 1) || ipResult == 1) {
                         ArrayList<String> banArray = new ArrayList<>();
@@ -87,7 +72,7 @@ public class PlayerJoinListener implements Listener {
                             }
                         }
                         if (banArray.size() == 1) {
-                            BanUtils altAccountBan = new BanUtils(e.getConnection().getUniqueId(), null, source, settings, standardBans);
+                            BanUtils altAccountBan = new BanUtils(e.getConnection().getUniqueId().toString(), null, source, settings, standardBans);
                             altAccountBan.banByStandard(1, e.getConnection().getSocketAddress().toString().replace("/", "").split(":")[0]);
                             e.getConnection().disconnect(new TextComponent(ChatColor.translateAlternateColorCodes('&', settings.getString("Ban.Disconnectmessage").replace("%reason%", altAccountBan.getGrund()).replace("%absatz%", "\n"))));
                             return;
@@ -98,14 +83,11 @@ public class PlayerJoinListener implements Listener {
             });
             LocalDateTime date = LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Europe/Berlin"));
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            new Onlinezeit(target, date.format(formatter), source).createNew(e.getConnection().getName());
-            UUIDFetcher.getName(e.getConnection().getUniqueId());
-            UUIDFetcher.getUUID(UUIDFetcher.getName(e.getConnection().getUniqueId()));
+            new Onlinezeit(name, date.format(formatter), source).createNew(e.getConnection().getName());
             clearMessages();
             updateBans();
-            updateIP(target, e.getConnection().getAddress().getAddress().getHostAddress());
-
-        PlayerData pl = new PlayerData(con.getUniqueId());
+            updateIP(name, e.getConnection().getAddress().getAddress().getHostAddress());
+        PlayerData pl = new PlayerData(name);
         pl.setIPOnlinePlayers(con.getAddress().getAddress().getHostAddress(), pl.getIPOnlinePlayers(con.getAddress().getAddress().getHostAddress()) + 1);
              if ((pl.getIPOnlinePlayers(con.getAddress().getAddress().getHostAddress()) > pl.getMaxIP(con.getAddress().getAddress().getHostAddress()))) {
                   e.setCancelled(true);
@@ -116,12 +98,7 @@ public class PlayerJoinListener implements Listener {
         }
     }
 
-    @EventHandler
-    public void onLeave(PlayerDisconnectEvent e) {
-        ProxiedPlayer con = e.getPlayer();
-        PlayerData pl = new PlayerData(con.getUniqueId());
-        pl.setIPOnlinePlayers(con.getAddress().getAddress().getHostAddress(), pl.getIPOnlinePlayers(con.getAddress().getAddress().getHostAddress()) - 1);
-    }
+
 
     private void updateBans() {
         try (Connection conn = source.getConnection();
@@ -131,7 +108,7 @@ public class PlayerJoinListener implements Listener {
                 if (rs.getLong("Bis") != -1L) {
                     long bis = rs.getLong("Bis");
                     if (System.currentTimeMillis() > bis) {
-                        new BanUtils(UUIDFetcher.getUUID(rs.getString("TargetName")), null, source, settings, standardBans).unban(false, "PLUGIN (expired)");
+                        new BanUtils(rs.getString("TargetName"), null, source, settings, standardBans).unban(false, "PLUGIN (expired)");
                     }
                 }
             }
@@ -140,14 +117,14 @@ public class PlayerJoinListener implements Listener {
         }
     }
 
-    private void updateIP(UUID uuid, String ip) {
+    private void updateIP(String name, String ip) {
         ip = ip.replace("/", "").split(":")[0];
         try (Connection conn = source.getConnection();
-             PreparedStatement ps = conn.prepareStatement("UPDATE bannedPlayers SET ip = ? WHERE TargetUUID = ?")) {
+             PreparedStatement ps = conn.prepareStatement("UPDATE bannedPlayers SET ip = ? WHERE TargetName = ?")) {
             ps.setString(1, ip);
-            ps.setString(2, uuid.toString());
+            ps.setString(2, name);
             ps.executeUpdate();
-            new PlayerData(uuid).updatePlayerData("lastIP", ip);
+            new PlayerData(name).updatePlayerData("lastIP", ip);
         } catch (SQLException e) {
             e.printStackTrace();
         }

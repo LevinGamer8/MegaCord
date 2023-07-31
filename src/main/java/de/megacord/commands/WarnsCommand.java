@@ -44,9 +44,9 @@ public class WarnsCommand extends Command {
 
     private void sendHelp(int seite, ProxiedPlayer pp, String targetName) {
 
-        UUID uuid = UUIDFetcher.getUUID(targetName);
+        UUID uuid = UUID.fromString(UUIDFetcher.getUUID(targetName));
         int zeilen = 10;
-        DBUtil.getWhatCount(MegaCord.getInstance().getDataSource(), uuid, "warn", true).whenComplete((allwarns, ex) -> {
+        DBUtil.getWhatCount(MegaCord.getInstance().getDataSource(), targetName, "warn", true).whenComplete((allwarns, ex) -> {
             int allPages = allwarns / zeilen;
             int eineSeitePlus = seite + 1;
             int eineSeiteMinus = seite - 1;
@@ -62,13 +62,13 @@ public class WarnsCommand extends Command {
             pp.sendMessage(new TextComponent(MegaCord.normal + "Warnungen von " + MegaCord.herH + targetName + " " + MegaCord.other2 + "(" + MegaCord.herH + seite + MegaCord.other2 + "/" + MegaCord.herH + allPages + MegaCord.other2 + ")"));
 
             HistoryManager historyManager = new HistoryManager();
-            List<HistoryElement> warns = historyManager.readHistory(uuid, zeilen, seite, "warn", false);
+            List<HistoryElement> warns = historyManager.readHistory(targetName, zeilen, seite, "warn", false);
             for (HistoryElement warn : warns) {
                 TextComponent tc = new TextComponent();
                 tc.setText(MegaCord.Prefix);
 
                 TextComponent tc1 = new TextComponent();
-                tc1.setText(MegaCord.normal + ChatColor.translateAlternateColorCodes('&', Config.settings.getString("Warns.Message").replace("%grund%", warn.getGrund()).replace("%wer%", UUIDFetcher.getName(warn.getTargetUUID())).replace("%von%", UUIDFetcher.getName(warn.getVonUUID())).replace("%time%", MegaCord.formatTime(warn.getErstellt()))));
+                tc1.setText(MegaCord.normal + ChatColor.translateAlternateColorCodes('&', Config.settings.getString("Warns.Message").replace("%grund%", warn.getGrund()).replace("%wer%", warn.getTargetName()).replace("%von%", warn.getVonName()).replace("%time%", MegaCord.formatTime(warn.getErstellt()))));
                 tc.addExtra(tc1);
 
                 TextComponent tc2 = new TextComponent();
@@ -77,7 +77,7 @@ public class WarnsCommand extends Command {
                 int i = 1;
                 while (true) {
                     try {
-                        String line = ChatColor.translateAlternateColorCodes('&', Config.settings.getString("Warns.hover." + i).replace("%grund%", warn.getGrund()).replace("%wer%", UUIDFetcher.getName(warn.getTargetUUID())).replace("%von%", UUIDFetcher.getName(warn.getVonUUID())).replace("%time%", MegaCord.formatTime(warn.getErstellt())));
+                        String line = ChatColor.translateAlternateColorCodes('&', Config.settings.getString("Warns.hover." + i).replace("%grund%", warn.getGrund()).replace("%wer%", warn.getTargetName()).replace("%von%", warn.getVonName()).replace("%time%", MegaCord.formatTime(warn.getErstellt())));
                         hoverArray.add(line);
                         i++;
                         if (i > 3)

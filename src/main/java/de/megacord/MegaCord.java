@@ -34,7 +34,7 @@ public final class MegaCord extends Plugin {
     private Map<String, Object> config = new HashMap();
     private static MegaCord plugin;
     private DataSource dataSource;
-    private HashMap<UUID, Long> allOnlineTimeToday = new HashMap<>();
+    private HashMap<String, Long> allOnlineTimeToday = new HashMap<>();
     private HashMap<ProxiedPlayer, ProxiedPlayer> activechats = new HashMap<>();
     private static final ConcurrentMap<String, Integer> ipCounts = new ConcurrentHashMap<>();
     public static ConcurrentMap<String, Integer> getIpCounts() { return MegaCord.ipCounts; }
@@ -121,25 +121,23 @@ public final class MegaCord extends Plugin {
 
     public void initMySQL() {
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement("CREATE TABLE IF NOT EXISTS bannedPlayers (TargetUUID VARCHAR(64) NOT NULL,TargetName VARCHAR(64),VonUUID VARCHAR(64) NOT NULL,VonName VARCHAR(64),Grund VARCHAR(100) NOT NULL,TimeStamp BIGINT NOT NULL,Bis VARCHAR(100) NOT NULL,Perma TINYINT(1) NOT NULL,Ban TINYINT(1) NOT NULL, ip VARCHAR(100), baneditiertvon VARCHAR(36), beweis VARCHAR(200))");
-             PreparedStatement ps1 = conn.prepareStatement("CREATE TABLE IF NOT EXISTS history (TargetUUID VARCHAR(64), VonUUID VARCHAR(64), Type VARCHAR(50), Grund VARCHAR(100), Erstellt BIGINT(8), Bis BIGINT(8), Perma TINYINT(1), Ban TINYINT(1), VonEntbannt VARCHAR(20))");
-             PreparedStatement ps2 = conn.prepareStatement("CREATE TABLE IF NOT EXISTS playerdata (UUID VARCHAR(64) NOT NULL, Name VARCHAR(64) NOT NULL, firstIP VARCHAR(60), lastIP VARCHAR(60), firstJoin BIGINT(8) NOT NULL, lastOnline BIGINT(8), bansMade INT(60) NOT NULL DEFAULT 0, warnsMade INT(60) NOT NULL DEFAULT 0, reportsMade INT(60) NOT NULL DEFAULT 0, bansReceive INT(60) NOT NULL DEFAULT 0, warnsReceive INT(60) NOT NULL DEFAULT 0, maxIP INT(2), ipOnlinePlayers INT, primary key(UUID))");
+             PreparedStatement ps = conn.prepareStatement("CREATE TABLE IF NOT EXISTS bannedPlayers (TargetName VARCHAR(64),VonName VARCHAR(64),Grund VARCHAR(100) NOT NULL,TimeStamp BIGINT NOT NULL,Bis VARCHAR(100) NOT NULL,Perma TINYINT(1) NOT NULL,Ban TINYINT(1) NOT NULL, ip VARCHAR(100), baneditiertvon VARCHAR(36), beweis VARCHAR(200))");
+             PreparedStatement ps1 = conn.prepareStatement("CREATE TABLE IF NOT EXISTS history (TargetName VARCHAR(64), VonName VARCHAR(64), Type VARCHAR(50), Grund VARCHAR(100), Erstellt BIGINT(8), Bis BIGINT(8), Perma TINYINT(1), Ban TINYINT(1), VonEntbannt VARCHAR(20))");
+             PreparedStatement ps2 = conn.prepareStatement("CREATE TABLE IF NOT EXISTS playerdata (Name VARCHAR(64) NOT NULL, firstIP VARCHAR(60), lastIP VARCHAR(60), firstJoin BIGINT(8) NOT NULL, lastOnline BIGINT(8), bansMade INT(60) NOT NULL DEFAULT 0, warnsMade INT(60) NOT NULL DEFAULT 0, reportsMade INT(60) NOT NULL DEFAULT 0, bansReceive INT(60) NOT NULL DEFAULT 0, warnsReceive INT(60) NOT NULL DEFAULT 0, maxIP INT(2), ipOnlinePlayers INT)");
              PreparedStatement ps3 = conn.prepareStatement("CREATE TABLE IF NOT EXISTS chat (message VARCHAR(255), uuid VARCHAR(100), timestamp BIGINT(8), server VARCHAR(50))");
-             PreparedStatement ps4 = conn.prepareStatement("CREATE TABLE IF NOT EXISTS onlinetime (UUID VARCHAR(255), Name VARCHAR(100), Datum VARCHAR(50), onlinezeit BIGINT(8))");
-             PreparedStatement ps5 = conn.prepareStatement("CREATE TABLE IF NOT EXISTS bedrockPlayers (UUID VARCHAR(255), Name VARCHAR(100))")
+             PreparedStatement ps4 = conn.prepareStatement("CREATE TABLE IF NOT EXISTS onlinetime (Name VARCHAR(100), Datum VARCHAR(50), onlinezeit BIGINT(8))");
         ) {
             ps.executeUpdate();
             ps1.executeUpdate();
             ps2.executeUpdate();
             ps3.executeUpdate();
             ps4.executeUpdate();
-            ps5.executeUpdate();
         } catch (SQLException e) {
             logger().log(Level.SEVERE, "Keine Verbindung zur Datenbank!", e);
         }
     }
 
-    public HashMap<UUID, Long> getAllOnlineTimeToday() {
+    public HashMap<String, Long> getAllOnlineTimeToday() {
         return allOnlineTimeToday;
     }
 
