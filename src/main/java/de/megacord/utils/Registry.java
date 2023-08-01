@@ -53,8 +53,6 @@ public class Registry {
         pluginManager.registerCommand(plugin, new FirstIPCommand());
         pluginManager.registerCommand(plugin, new LastIPCommand());
         pluginManager.registerCommand(plugin, new ReportsClear());
-        pluginManager.registerCommand(plugin, new ChatClearCommand());
-        pluginManager.registerCommand(plugin, new PingCommand());
         pluginManager.registerCommand(plugin, new KickallCommand());
         pluginManager.registerCommand(plugin, new WhereisCommand());
         pluginManager.registerCommand(plugin, new MSGCommand());

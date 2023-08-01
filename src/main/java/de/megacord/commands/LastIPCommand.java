@@ -28,13 +28,12 @@ public class LastIPCommand extends Command {
 
         if (sender instanceof ProxiedPlayer) {
             ProxiedPlayer target = ProxyServer.getInstance().getPlayer(args[0]);
-            String uuid = String.valueOf(target.getUniqueId());
 
-            if(uuid == null) {
+            if(target == null) {
                 sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler existiert nicht!"));
                 return;
             }
-            String ip = new PlayerData(uuid).getLastip();
+            String ip = new PlayerData(target.getName()).getLastip();
             if (ip == null || ip.equals("")) {
                 sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.herH + args[0] + MegaCord.fehler + " war noch nie auf dem Netzwerk!"));
                 return;
