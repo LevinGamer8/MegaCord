@@ -126,7 +126,7 @@ public class CheckCommand extends Command {
                         if (historyCount != 0) {
                             tc1.setText(MegaCord.other2 + " [" + MegaCord.fehler + "MEHR" + MegaCord.other2 + "]");
                             tc1.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(MegaCord.other2 + "(" + MegaCord.fehler + "Click" + MegaCord.other2 + ")")));
-                            tc1.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/history " + p.getName()));
+                            tc1.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/banlist " + p.getName()));
                             if (sender instanceof ProxiedPlayer)
                                 tc.addExtra(tc1);
                         }

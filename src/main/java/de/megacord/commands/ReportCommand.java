@@ -48,8 +48,8 @@ public class ReportCommand extends Command {
         String query = "INSERT INTO reports (reporter, reported, reason) VALUES (?, ?, ?)";
         try (Connection conn = source.getConnection()) {
             try (PreparedStatement statement = conn.prepareStatement(query)) {
-                statement.setString(1, player.getUniqueId().toString());
-                statement.setString(2, reportedUuid.toString());
+                statement.setString(1, player.getName());
+                statement.setString(2, reportedName);
                 statement.setString(3, reason);
                 statement.executeUpdate();
                 player.sendMessage(new TextComponent("§6Du §7hast §aerfolgreich §4" + reportedName + " gemeldet."));

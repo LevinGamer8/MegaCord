@@ -64,7 +64,7 @@ public class BanUtils {
         this.settings = settings;
         this.standardBans = standardBans;
 
-        this.setTargetName(targetName);
+        this.setTargetName(name);
         this.setIp(ip == null ? "0" : ip);
         String sql = "SELECT * FROM bannedPlayers WHERE TargetName = ?";
         if (ip != null) {

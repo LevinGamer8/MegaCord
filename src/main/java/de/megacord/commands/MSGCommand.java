@@ -18,7 +18,7 @@ public class MSGCommand extends Command {
     public void execute(CommandSender sender, String[] args) {
         if (sender instanceof ProxiedPlayer) {
             if (args.length == 0) {
-                sender.sendMessage(new TextComponent(ChatColor.RED + "Nutze: /msg <Spieler> <Nachricht>"));
+                sender.sendMessage(new TextComponent(MegaCord.Prefix + "§4bNutze: §3/msg [Spieler] [Nachricht]"));
             } else {
                 ProxiedPlayer p = ProxyServer.getInstance().getPlayer(args[0]);
                 if (p == null) {
