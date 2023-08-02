@@ -244,9 +244,9 @@ public class BanUtils {
             tc.addExtra(tc2);
 
             // NACHRICHT AN ALLE ANDEREN
-            for (ProxiedPlayer all : ProxyServer.getInstance().getPlayers()) {
-                if ((all.hasPermission("megacord.punish.notify") || all.hasPermission("megacord.*")) || all.getName().equalsIgnoreCase(getVonName()))
-                    all.sendMessage(tc);
+            for (ProxiedPlayer team : ProxyServer.getInstance().getPlayers()) {
+                if ((team.hasPermission("megacord.punish.notify") || team.hasPermission("megacord.*")) || team.getName().equalsIgnoreCase(getVonName()))
+                    team.sendMessage(tc);
             }
         }, MegaCord.getInstance().EXECUTOR_SERVICE);
     }

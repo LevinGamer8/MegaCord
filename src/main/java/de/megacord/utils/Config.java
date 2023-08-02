@@ -45,8 +45,8 @@ public class Config {
                 mysqlConfig.set("host", "localhost");
                 mysqlConfig.set("port", 3308);
                 mysqlConfig.set("database", "megacord");
-                mysqlConfig.set("username", "server");
-                mysqlConfig.set("password", "mega8844");
+                mysqlConfig.set("username", "user");
+                mysqlConfig.set("password", "123");
                 ConfigurationProvider.getProvider(YamlConfiguration.class).save(mysqlConfig, mysqlFile);
             }
             mysqlConfig = ConfigurationProvider.getProvider(YamlConfiguration.class).load(mysqlFile);
@@ -121,11 +121,16 @@ public class Config {
                 settings.set("Ban.Editinfo", "&aDer Ban von &b%target% &awurde von &b%player% &aeditiert!");
                 settings.set("Ban.Disconnectmessage", "§8-------------------------------%absatz% §3§lMegaCraft §e§lNetzwerk§r%absatz%§4Du wurdest §4§lgebannt!§r%absatz%§bGrund §8» §c%reason% %absatz%§8-------------------------------");
                 settings.set("Ban.Usermessage", "&aDer Spieler &b%target% &awurde für &b%reason% &agebannt!");
-                settings.set("Ban.Extrainfohover.1", "&bUUID: &3%uuid%");
-                settings.set("Ban.Extrainfohover.2", "&bVon: &3%name%");
-                settings.set("Ban.Extrainfohover.3", "&bGrund: &3%reason%");
-                settings.set("Ban.Extrainfohover.4", "&bBis: &3%bis%");
-                settings.set("Ban.Extrainfohover.5", "&bErstellt: &3%erstellt%");
+                settings.set("Ban.Extrainfohover.1", "&bVon: &3%name%");
+                settings.set("Ban.Extrainfohover.2", "&bGrund: &3%reason%");
+                settings.set("Ban.Extrainfohover.3", "&bBis: &3%bis%");
+                settings.set("Ban.Extrainfohover.4", "&bErstellt: &3%erstellt%");
+
+                settings.set("Kick.Kickinfo", "&b%player% &ahat &b%target% &afür &b%reason% &agekickt!");
+                settings.set("Kick.Disconnectmessage", "§8-------------------------------%absatz% §3§lMegaCraft §e§lNetzwerk§r%absatz%§4Du wurdest §4§lgekick!§r%absatz%§bGrund §8» §c%reason% %absatz%§8-------------------------------");
+                settings.set("Kick.Usermessage", "&aDer Spieler &b%target% &awurde für &b%reason% &agekick!");
+                settings.set("Kick.Extrainfohover.1", "&bVon: &3%name%");
+                settings.set("Kick.Extrainfohover.2", "&bGrund: &3%reason%");
 
                 settings.set("Chatlog.Oncooldown", "§4Du kannst erst bald einen weiteren Chatlog erstellen!");
                 settings.set("Chatlog.created", "§aDer Chatlog wird nun weitergeleitet!");
@@ -143,14 +148,13 @@ public class Config {
                 settings.set("Check.history", "&aHistory: &b%historyCount%");
                 settings.set("Check.stats", "&aStats: ");
                 settings.set("Check.hover2.1", "&dIP: &3%ip%");
-                settings.set("Check.hover2.2", "&dPower: &3%power%");
-                settings.set("Check.hover2.3", "&dErstes mal Online: &3%firstJoin%");
-                settings.set("Check.hover2.4", "&dLetztes mal Online: &3%lastOnline%");
-                settings.set("Check.hover2.5", "&dReports Erstellt: &3%reportsMade%");
-                settings.set("Check.hover2.6", "&dWarns Erhalten: &3%warnsReceive%");
-                settings.set("Check.hover2.7", "&dBans Erhalten: &3%bansReceive%");
-                settings.set("Check.hover2.8", "&dWarns Erstellt: &3%warnsMade%");
-                settings.set("Check.hover2.9", "&dBans Erstellt: &3%bansMade%");
+                settings.set("Check.hover2.2", "&dErstes mal Online: &3%firstJoin%");
+                settings.set("Check.hover2.3", "&dLetztes mal Online: &3%lastOnline%");
+                settings.set("Check.hover2.4", "&dReports Erstellt: &3%reportsMade%");
+                settings.set("Check.hover2.5", "&dWarns Erhalten: &3%warnsReceive%");
+                settings.set("Check.hover2.6", "&dBans Erhalten: &3%bansReceive%");
+                settings.set("Check.hover2.7", "&dWarns Erstellt: &3%warnsMade%");
+                settings.set("Check.hover2.8", "&dBans Erstellt: &3%bansMade%");
                 settings.set("Check.onlinezeit", "&aOnlinezeit: ");
 
                 settings.set("History.Message", "&8(&6%type%&8) &f» &d%grund% &8{&a%time%&8} &f» ");

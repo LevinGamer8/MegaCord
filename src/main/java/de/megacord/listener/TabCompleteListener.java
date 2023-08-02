@@ -18,27 +18,26 @@ public class TabCompleteListener implements Listener {
         final String cursor = e.getCursor().toLowerCase();
         if (!cursor.startsWith("/ban ") &&
                 !cursor.startsWith("/unban ") &&
-                !cursor.startsWith("/chatlog ") &&
-                !cursor.startsWith("/reset ") &&
                 !cursor.startsWith("/accounts ") &&
+                !cursor.startsWith("/alts ") &&
+                !cursor.startsWith("/alt ") &&
                 !cursor.startsWith("/warns ") &&
                 !cursor.startsWith("/bans ") &&
                 !cursor.startsWith("/report ") &&
                 !cursor.startsWith("/reports ") &&
                 !cursor.startsWith("/ip ") &&
+                !cursor.startsWith("/firtip ") &&
+                !cursor.startsWith("/lastip ") &&
                 !cursor.startsWith("/check ") &&
                 !cursor.startsWith("/history ") &&
                 !cursor.startsWith("/kick ") &&
                 !cursor.startsWith("/warn ") &&
                 !cursor.startsWith("/banadd ") &&
                 !cursor.startsWith("/banremove ") &&
-                !cursor.startsWith("/changeid ") &&
-                !cursor.startsWith("/blacklist ") &&
-                !cursor.startsWith("/chatlog ") &&
-                !cursor.startsWith("/chatlogs ") &&
+                !cursor.startsWith("/banidedit ") &&
                 !cursor.startsWith("/onlinezeit ") &&
                 !cursor.startsWith("/setmaxip ") &&
-                !cursor.startsWith("/editban ")) {
+                !cursor.startsWith("/banedit ")) {
             return;
         }
 

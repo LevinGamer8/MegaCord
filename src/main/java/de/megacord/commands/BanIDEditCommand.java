@@ -15,7 +15,7 @@ import java.util.logging.Level;
 public class BanIDEditCommand extends Command {
 
     public BanIDEditCommand() {
-        super("Banidedit");
+        super("Banidedit", "megacord.punish.banidedit");
     }
 
     private String reason, reason2;

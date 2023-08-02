@@ -194,7 +194,7 @@ public class BanCommand extends Command {
 
             String perm = Config.ban.getString("BanIDs." + banID + ".Permission");
             if (!perm.equalsIgnoreCase("")) {
-                if (!sender.hasPermission("bungeecord.*")) {
+                if (!sender.hasPermission("megacord.*")) {
                     if (!sender.hasPermission(perm))
                         continue;
                 }

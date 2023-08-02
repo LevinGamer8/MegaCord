@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 public class BanEditCommand extends Command {
 
     public BanEditCommand() {
-        super("banedit");
+        super("banedit", "megacord.punish.banedit");
     }
 
     @Override

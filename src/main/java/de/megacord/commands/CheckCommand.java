@@ -37,7 +37,10 @@ public class CheckCommand extends Command {
                     targetConnected = true;
                 }
                 sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.normal + "Checke " + MegaCord.herH + args[0]));
-
+                if (p == null) {
+                    checkOffline(args[0], sender);
+                    return;
+                }
                 check(p, sender);
             } //else
                 //Help Message
@@ -182,4 +185,143 @@ public class CheckCommand extends Command {
             });
         });
     }
+
+    public void checkOffline(String playerName, CommandSender sender) {
+        BanUtils ban = new BanUtils(playerName, null, MegaCord.getInstance().getDataSource(), Config.settings, Config.standardBans);
+        ban.isBanned(playerName);
+
+
+        resetTC();
+        if (tc.getExtra() != null)
+            tc.getExtra().clear();
+        ban.isBanned(playerName).whenComplete((result, ex) -> {
+            if (result) {
+                tc.setText(MegaCord.Prefix + ChatColor.translateAlternateColorCodes('&', Config.settings.getString("Check.status").replace("%status%", (ban.getBan() == 0 ? "Gemutet" : "Gebannt"))));
+                String hover1 = Config.settings.getString("Check.hover.1");
+                String hover2 = Config.settings.getString("Check.hover.2");
+                String hover3 = Config.settings.getString("Check.hover.3");
+                String hover4 = Config.settings.getString("Check.hover.4");
+                if (sender instanceof ProxiedPlayer) {
+                    tc1.setText(MegaCord.other2 + " [" + MegaCord.fehler + "MEHR" + MegaCord.other2 + "]");
+                    if (!ban.getBeweis().equals("/"))
+                        tc1.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, ban.getBeweis()));
+                    tc1.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.translateAlternateColorCodes('&', hover1 + "\n" + hover2 + "\n" + hover3 + "\n" + hover4 + (!ban.getBeweis().equals("/") ? ("\n" + MegaCord.normal + "Klick um den " + MegaCord.herH + "Beweislink" + MegaCord.normal + " zu öffnen!") : "\n" + MegaCord.fehler + "Kein Beweislink angegeben")).replace("%name%", ban.getVonName()).replace("%reason%", ban.getGrund()).replace("%bis%", ban.getBis() == -1 ? "§3Permanent" : MegaCord.formatTime(ban.getBis())).replace("%editby%", ban.getEditBy()))));
+                } else {
+                    tc1.setText(ChatColor.translateAlternateColorCodes('&', "\n" + hover1 + "\n" + hover2 + "\n" + hover3 + "\n" + hover4 + "\n" + MegaCord.normal + "Beweis: " + MegaCord.herH + ban.getBeweis()).replace("%name%", ban.getVonName()).replace("%reason%", ban.getGrund()).replace("%bis%", ban.getBis() == -1 ? "§3Permanent" : MegaCord.formatTime(ban.getBis())).replace("%editby%", ban.getEditBy()));
+                }
+                tc.addExtra(tc1);
+            } else
+                tc.setText(MegaCord.Prefix + ChatColor.translateAlternateColorCodes('&', Config.settings.getString("Check.status").replace("%status%", "Nicht Gebannt/Gemuted")));
+            sender.sendMessage(tc);
+
+            resetTC();
+            if (tc.getExtra() != null)
+                tc.getExtra().clear();
+            DBUtil.getWhatCount(MegaCord.getInstance().getDataSource(), playerName, "report", true).whenComplete((reports, exe) -> {
+
+                tc.setText(MegaCord.Prefix + ChatColor.translateAlternateColorCodes('&', Config.settings.getString("Check.reports").replace("%reportCount%", (reports == -1 || reports == 0 ? "§cKeine" : String.valueOf(reports)))));
+                if (reports >= 1) {
+                    tc1.setText(MegaCord.other2 + " [" + MegaCord.fehler + "MEHR" + MegaCord.other2 + "]");
+                    tc1.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(MegaCord.other2 + "(" + MegaCord.fehler + "Click" + MegaCord.other2 + ")")));
+                    tc1.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/reports " + playerName + " 1"));
+                    if (sender instanceof ProxiedPlayer)
+                        tc.addExtra(tc1);
+                }
+                sender.sendMessage(tc);
+                resetTC();
+
+                if (tc.getExtra() != null)
+                    tc.getExtra().clear();
+                DBUtil.getWhatCount(MegaCord.getInstance().getDataSource(), playerName, "warn", true).whenComplete((warns, exc) -> {
+                    tc.setText(MegaCord.Prefix + ChatColor.translateAlternateColorCodes('&', Config.settings.getString("Check.warns").replace("%warnsCount%", (warns == -1 || warns == 0 ? "§cKeine" : String.valueOf(warns)))));
+                    if (warns != 0) {
+                        tc1.setText(MegaCord.other2 + " [" + MegaCord.fehler + "MEHR" + MegaCord.other2 + "]");
+                        tc1.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(MegaCord.other2 + "(" + MegaCord.fehler + "Click" + MegaCord.other2 + ")")));
+                        tc1.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/warns " + playerName));
+                        if (sender instanceof ProxiedPlayer)
+                            tc.addExtra(tc1);
+                    }
+                    sender.sendMessage(tc);
+
+                    resetTC();
+                    if (tc.getExtra() != null)
+                        tc.getExtra().clear();
+                    DBUtil.getWhatCount(MegaCord.getInstance().getDataSource(), playerName, "ban", true).whenComplete((bans, exception) -> {
+                        tc.setText(MegaCord.Prefix + ChatColor.translateAlternateColorCodes('&', Config.settings.getString("Check.bans").replace("%bansCount%", (bans == -1 || bans == 0 ? "§cKeine" : String.valueOf(bans)))));
+                        if (bans != 0) {
+                            tc1.setText(MegaCord.other2 + " [" + MegaCord.fehler + "MEHR" + MegaCord.other2 + "]");
+                            tc1.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(MegaCord.other2 + "(" + MegaCord.fehler + "Click" + MegaCord.other2 + ")")));
+                            tc1.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/banlist " + playerName));
+                            if (sender instanceof ProxiedPlayer)
+                                tc.addExtra(tc1);
+                        }
+                        sender.sendMessage(tc);
+
+                        resetTC();
+                        if (tc.getExtra() != null)
+                            tc.getExtra().clear();
+                        int historyCount = bans + warns + reports;
+                        tc.setText(MegaCord.Prefix + ChatColor.translateAlternateColorCodes('&', Config.settings.getString("Check.history").replace("%historyCount%", (historyCount == -1 || historyCount == 0 ? "§cKeine" : String.valueOf(historyCount)))));
+                        if (historyCount != 0) {
+                            tc1.setText(MegaCord.other2 + " [" + MegaCord.fehler + "MEHR" + MegaCord.other2 + "]");
+                            tc1.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(MegaCord.other2 + "(" + MegaCord.fehler + "Click" + MegaCord.other2 + ")")));
+                            tc1.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/banlist " + playerName));
+                            if (sender instanceof ProxiedPlayer)
+                                tc.addExtra(tc1);
+                        }
+                        sender.sendMessage(tc);
+
+                        resetTC();
+                        //                        STATS
+                        if (tc.getExtra() != null)
+                            tc.getExtra().clear();
+                        tc.setText(MegaCord.Prefix + MegaCord.normal + ChatColor.translateAlternateColorCodes('&', Config.settings.getString("Check.stats")));
+
+                        ArrayList<String> hoverArray = new ArrayList<>();
+                        int i = 1;
+                        hoverArray.add(MegaCord.fehler + "Dieser Spieler war noch nie auf dem Netzwerk!");
+                        PlayerData playerdata = new PlayerData(playerName);
+                        while (true) {
+                            try {
+                                String line = ChatColor.translateAlternateColorCodes('&', Config.settings.getString("Check.hover2." + i)).replace("%ip%", (playerdata.getLastip() == null || playerdata.getLastip().equals("")) ? MegaCord.fehler + "War noch nie hier :/" : ((sender.hasPermission("bungeecord.ip") || sender.hasPermission("bungeecord.*")) ? playerdata.getLastip() : "§k123.123.123.123")).replace("%firstJoin%", playerdata.getFirstjoin() == 0 ? MegaCord.fehler + "War noch nie hier :/" : (MegaCord.formatTime(playerdata.getFirstjoin()))).replace("%lastOnline%", playerdata.getLastonline() == 0 ? MegaCord.fehler + "War noch nie hier :/" : (playerdata.getLastonline() == -1 ? "Ist das erste mal hier ;)" : (targetConnected ? "Ist gerade Online :)" : MegaCord.formatTime(playerdata.getLastonline())))).replace("%reportsMade%", playerdata.getReportsMade() + "").replace("%warnsReceive%", playerdata.getWarnsReceive() + "").replace("%bansReceive%", playerdata.getBansReceive() + "").replace("%warnsMade%", playerdata.getWarnsMade() + "").replace("%bansMade%", playerdata.getBansMade() + "");
+                                hoverArray.add(line);
+                                i++;
+                                if (i > 9) {
+                                    hoverArray.remove(0);
+                                    break;
+                                }
+                            } catch (Exception e1) {
+                                break;
+                            }
+                        }
+
+                        tc1.setText(MegaCord.other2 + "[" + MegaCord.fehler + "MEHR" + MegaCord.other2 + "]");
+                        tc1.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(String.join("\n", hoverArray))));
+                        tc.addExtra(tc1);
+
+                        Onlinezeit onlinezeit = new Onlinezeit(sender, MegaCord.getInstance().getDataSource());
+                        if (!(sender instanceof ProxiedPlayer)) {
+                            String h = hoverArray.get(0);
+                            h = "\n" + h + "\n";
+                            hoverArray.remove(0);
+                            sender.sendMessage(new TextComponent(tc.getText() + h + String.join("\n", hoverArray)));
+
+//                            ONLINEZEIT CONSOLE
+                            onlinezeit.sendTrend(playerName, 7, true, ChatColor.translateAlternateColorCodes('&', Config.settings.getString("Check.onlinezeit")));
+                            return;
+                        }
+
+                        sender.sendMessage(tc);
+                        resetTC();
+
+//                        ONLINEZEIT
+                        onlinezeit.sendTrend(playerName, 7, false, ChatColor.translateAlternateColorCodes('&', Config.settings.getString("Check.onlinezeit")));
+                    });
+                });
+            });
+        });
+
+
+    }
+
 }

@@ -17,7 +17,7 @@ import java.util.logging.Level;
 public class BanAddCommand extends Command {
 
     public BanAddCommand() {
-        super("banadd");
+        super("banadd", "megacord.punish.banadd");
     }
 
     public static int phase = 1;

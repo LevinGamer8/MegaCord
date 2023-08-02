@@ -1,14 +1,18 @@
 package de.megacord.commands;
 
+import de.megacord.MegaCord;
 import de.megacord.utils.HistoryManager;
 import de.megacord.utils.MySQLConnection;
 import de.megacord.utils.UUIDFetcher;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
+import net.md_5.bungee.config.Configuration;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,8 +21,11 @@ import java.util.*;
 
 public class KickCommand extends Command {
 
-    public KickCommand() {
+    private final Configuration settings;
+
+    public KickCommand(Configuration settings) {
         super("kick", "megacord.command.kick");
+        this.settings = settings;
     }
 
     @Override
@@ -39,15 +46,43 @@ public class KickCommand extends Command {
 
             String grund = args.length > 1 ? args[1] : "Es wurde kein Grund angegeben.";
 
-            player.disconnect(new TextComponent("§8-------------------------------\n\n §3§lMegaCraft §e§lNetzwerk§r\n\n§4Du wurdest §4§lgekickt§!§r\n\n§bGrund §8» §c" + grund + "\n\n§8-------------------------------"));
+            player.disconnect(new TextComponent(settings.getString("Kick.Disconnectmessage")));
 
                 HistoryManager historyManager = new HistoryManager();
                 historyManager.insertInDB(playerName, sender.getName(), "kick", grund, Long.parseLong("0"), Long.parseLong("0"), 0, 0);
-                    for (ProxiedPlayer team : ProxyServer.getInstance().getPlayers()) {
-                        if (team.hasPermission("megacord.punish.notify")) {
-                            team.sendMessage(new TextComponent(ChatColor.GRAY + "Der " + ChatColor.GOLD + "Spieler " + ChatColor.DARK_RED + playerName + " §7wurde für §c" + grund + " §4gekicktt!"));
-                        }
+
+            String message = (MegaCord.Prefix + settings.getString("Kick.Kickinfo").replace("%player%", sender.getName()).replace("%target%", playerName).replace("%reason%", grund)).replace("&", "§");
+            TextComponent tc = new TextComponent();
+            tc.setText(message + " ");
+            TextComponent tc2 = new TextComponent();
+            tc2.setText(MegaCord.other2 + "[" + MegaCord.fehler + "MEHR" + MegaCord.other2 + "]");
+
+            ArrayList<String> hoverArray = new ArrayList<>();
+
+            int i = 1;
+            while (true) {
+                try {
+                    String line = ChatColor.translateAlternateColorCodes('&', settings.getString("Kick.Extrainfohover." + i)).replace("%target%", playerName.toString()).replace("%name%", sender.getName()).replace("%reason%", grund);
+                    hoverArray.add(line);
+                    if (i > 4) {
+                        break;
                     }
+                    i++;
+                } catch (Exception e1) {
+                    break;
+                }
+            }
+
+            tc2.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(String.join("\n", hoverArray))));
+            tc.addExtra(tc2);
+
+            // NACHRICHT AN ALLE ANDEREN
+            for (ProxiedPlayer team : ProxyServer.getInstance().getPlayers()) {
+                if ((team.hasPermission("megacord.punish.notify") || team.hasPermission("megacord.*")) || team.getName().equalsIgnoreCase(sender.getName()))
+                    team.sendMessage(tc);
+            }
+
+
                 }
         }
     public Iterable<String> onTabComplete(CommandSender sender, String[] args) {

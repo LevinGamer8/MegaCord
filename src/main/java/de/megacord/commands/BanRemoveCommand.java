@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class BanRemoveCommand extends Command {
 
     public BanRemoveCommand() {
-        super("banremove");
+        super("banremove", "megacord.punish.banremove");
     }
 
     @Override

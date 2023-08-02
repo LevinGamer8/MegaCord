@@ -28,13 +28,7 @@ public class FirstIPCommand extends Command {
 
         if (sender instanceof ProxiedPlayer) {
             ProxiedPlayer target = ProxyServer.getInstance().getPlayer(args[0]);
-            UUID uuid = target.getUniqueId();
-
-            if(uuid == null) {
-                sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler existiert nicht!"));
-                return;
-            }
-            String ip = new PlayerData(uuid.toString()).getFirstip();
+            String ip = new PlayerData(target.getName()).getFirstip();
             if (ip == null || ip.equals("")) {
                 sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.herH + args[0] + MegaCord.fehler + " war noch nie auf dem Netzwerk!"));
                 return;

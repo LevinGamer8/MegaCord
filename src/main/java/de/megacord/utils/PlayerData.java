@@ -29,6 +29,7 @@ public class PlayerData {
     private DataSource source;
 
     public PlayerData(String name) {
+        this.name = name;
         this.source = MegaCord.getInstance().getDataSource();
         loadData();
     }
