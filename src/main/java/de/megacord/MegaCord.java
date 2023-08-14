@@ -1,6 +1,5 @@
 package de.megacord;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.megacord.commands.BungeeCommand;
 import de.megacord.utils.*;
 
@@ -30,7 +29,6 @@ public final class MegaCord extends Plugin {
     private Timer timer;
     private String message;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
     private Map<String, Object> config = new HashMap();
     private static MegaCord plugin;
     private DataSource dataSource;

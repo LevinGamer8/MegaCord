@@ -1,15 +1,15 @@
 package de.megacord.commands;
 
 import de.megacord.MegaCord;
+import de.megacord.utils.BanUtils;
+import de.megacord.utils.Config;
+import de.megacord.utils.PlayerData;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.logging.Level;
 
 public class UnbanCommand extends Command {
 
@@ -23,13 +23,23 @@ public class UnbanCommand extends Command {
     public void execute(CommandSender sender, String[] args) {
         if (sender.hasPermission("megacord.punish.unban") || sender.hasPermission("megacord.*")) {
             if (args.length == 1) {
-                try (Connection conn = getSource().getConnection(); PreparedStatement ps = conn.prepareStatement("DELETE FROM bannedPlayers WHERE TargetName = ?")) {
-                    ps.setString(1, args[0]);
-                    ps.executeUpdate();
-                    sender.sendMessage(MegaCord.Prefix + "§aDer §6Spieler §awurde erfolgreich entbannt!");
-                } catch (SQLException e) {
-                    MegaCord.logger().log(Level.WARNING, "could not delete player from bannedplayer-Table", e);
+
+                PlayerData pd = new PlayerData(args[0]);
+                if (!(pd.exists(args[0]))) {
+                    sender.sendMessage(MegaCord.Prefix + "§4Der Spieler war noch nie auf dem Netzwerk!");
+                    return;
                 }
+
+                BanUtils ban = new BanUtils(args[0], pd.getLastip(), MegaCord.getInstance().getDataSource(), Config.settings, Config.standardBans);
+
+                ban.isBanned(pd.getName()).whenComplete((bannedResult, exception) -> {
+                    if (bannedResult) {
+                        ban.unban(true, sender instanceof ProxiedPlayer ? sender.getName() : "CONSOLE").whenComplete((result, ex) -> {
+                            if (!result)
+                                sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Ein Fehler ist aufgetreten!"));
+                        });
+                    }
+                });
             }
         } else
             sender.sendMessage(new TextComponent(MegaCord.noPerm));

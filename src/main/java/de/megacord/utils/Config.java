@@ -131,6 +131,7 @@ public class Config {
                 settings.set("Kick.Usermessage", "&aDer Spieler &b%target% &awurde für &b%reason% &agekick!");
                 settings.set("Kick.Extrainfohover.1", "&bVon: &3%name%");
                 settings.set("Kick.Extrainfohover.2", "&bGrund: &3%reason%");
+                settings.set("Kick.Extrainfohover.3", "&bErstellt: &3%erstellt%");
 
                 settings.set("Chatlog.Oncooldown", "§4Du kannst erst bald einen weiteren Chatlog erstellen!");
                 settings.set("Chatlog.created", "§aDer Chatlog wird nun weitergeleitet!");
@@ -245,6 +246,18 @@ public class Config {
                 settings.set("WarnMessage.line4", "&aGrund: &b%grund%");
                 settings.set("WarnMessage.line5", "");
                 settings.set("WarnMessage.line6", "&e[&m===============================&e]");
+
+                settings.set("GeoLocate.lines", 6);
+                settings.set("GeoLocate.line1", "&8---------- &bGeoLocate &8----------");
+                settings.set("GeoLocate.line2", "§aIP§7: §3%IP%");
+                settings.set("GeoLocate.line3", "§aStadt§7: §3%STADT%");
+                settings.set("GeoLocate.line4", "§aRegion§7: §3%REGION%");
+                settings.set("GeoLocate.line5", "§aLand§7: §3%LAND%");
+                settings.set("GeoLocate.line6", "&8---------- &bGeoLocate &8----------");
+
+
+
+
                 ConfigurationProvider.getProvider(YamlConfiguration.class).save(settings, settingsFile);
             }
             settings = ConfigurationProvider.getProvider(YamlConfiguration.class).load(settingsFile);

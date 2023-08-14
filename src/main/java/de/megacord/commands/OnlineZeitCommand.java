@@ -2,7 +2,7 @@ package de.megacord.commands;
 
 import de.megacord.MegaCord;
 import de.megacord.utils.Onlinezeit;
-import de.megacord.utils.UUIDFetcher;
+import de.megacord.utils.PlayerData;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -106,7 +106,10 @@ public class OnlineZeitCommand extends Command {
                     }
                     if (sender.hasPermission("megacord.onlinezeit.player") || sender.hasPermission("megacord.*") || sender.hasPermission("megacord.onlinezeit.*")) {
                         // /onlinezeit <Spieler>
-                        if (UUIDFetcher.getUUID(args[0]) == null) {
+
+                        PlayerData pl = new PlayerData(args[0]);
+
+                        if (!(pl.exists(args[0]))) {
                             sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler existiert nicht!"));
                             return;
                         }
@@ -125,7 +128,8 @@ public class OnlineZeitCommand extends Command {
                         return;
                     }
                     if (sender.hasPermission("megacord.onlinezeit.total.other") || sender.hasPermission("megacord.*") || sender.hasPermission("megacord.onlinezeit.*")) {
-                        if (UUIDFetcher.getUUID(args[1]) == null) {
+                        PlayerData pl = new PlayerData(args[1]);
+                        if (!(pl.exists(args[1]))) {
                             sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler existiert nicht!"));
                             return;
                         }
@@ -142,7 +146,8 @@ public class OnlineZeitCommand extends Command {
                         return;
                     } catch (NumberFormatException e) { // /onlinezeit trend <Spieler>
                         if (sender.hasPermission("megacord.onlinezeit.trend.other") || sender.hasPermission("megacord.*") || sender.hasPermission("megacord.onlinezeit.*")) {
-                            if (UUIDFetcher.getUUID(args[1]) == null) {
+                            PlayerData pl = new PlayerData(args[1]);
+                            if (!(pl.exists(args[1]))) {
                                 sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler existiert nicht!"));
                                 return;
                             }
@@ -160,18 +165,20 @@ public class OnlineZeitCommand extends Command {
                         return;
                     }
                     if (sender.hasPermission("megacord.onlinezeit.week.other") || sender.hasPermission("megacord.*") || sender.hasPermission("megacord.onlinezeit.*")) {
-                        if (UUIDFetcher.getUUID(args[1]) == null) {
+                        PlayerData pl = new PlayerData(args[1]);
+                        if (!(pl.exists(args[1]))) {
                             sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler existiert nicht!"));
                             return;
                         }
-                        onlinezeit.sendWeek(UUIDFetcher.getUUID(args[1]).toString(), !(sender instanceof ProxiedPlayer));
+                        onlinezeit.sendWeek(args[1], !(sender instanceof ProxiedPlayer));
                         return;
                     }
                     return;
                 }
                 if (sender.hasPermission("megacord.onlinezeit.player.datum") || sender.hasPermission("megacord.*") || sender.hasPermission("megacord.onlinezeit.*")) {
                     // /onlinezeit <Spieler> <Datum>
-                    if (UUIDFetcher.getUUID(args[0]) == null) {
+                    PlayerData pl = new PlayerData(args[0]);
+                    if (!(pl.exists(args[0]))) {
                         sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler existiert nicht!"));
                         return;
                     }
@@ -192,7 +199,8 @@ public class OnlineZeitCommand extends Command {
                 // /onlinezeit trend <Spieler> <Tage>
                 if (args[0].equalsIgnoreCase("trend")) {
                     if (sender.hasPermission("megacord.onlinezeit.trend.other.days") || sender.hasPermission("megacord.*") || sender.hasPermission("megacord.onlinezeit.*")) {
-                        if (UUIDFetcher.getUUID(args[1]) == null) {
+                        PlayerData pl = new PlayerData(args[0]);
+                        if (!(pl.exists(args[1]))) {
                             sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler existiert nicht!"));
                             return;
                         }

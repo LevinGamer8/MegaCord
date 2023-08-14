@@ -1,7 +1,7 @@
 package de.megacord.commands;
 
 import de.megacord.MegaCord;
-import de.megacord.utils.UUIDFetcher;
+import de.megacord.utils.PlayerData;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
@@ -13,7 +13,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.UUID;
 
 public class ReportCommand extends Command {
 
@@ -39,9 +38,8 @@ public class ReportCommand extends Command {
         ProxiedPlayer player = (ProxiedPlayer) sender;
         String reportedName = args[0];
         String reason = String.join(" ", args[1]);
-        UUID reportedUuid = null;
-        reportedUuid = UUID.fromString(UUIDFetcher.getUUID(reportedName));
-        if (reportedUuid == null) {
+        PlayerData pl = new PlayerData(reportedName);
+        if (!(pl.exists(reportedName))) {
             sender.sendMessage(new TextComponent("§4Es wurde kein Spieler mit dem Namen '" + reportedName + "' gefunden."));
             return;
         }

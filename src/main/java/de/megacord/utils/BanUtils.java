@@ -420,7 +420,6 @@ public class BanUtils {
                 ResultSet rs = ps.executeQuery();
                 if (!rs.next())
                     return false;
-
                 boolean banned = false;
                 long bis = -1;
                 while (rs.next()) {

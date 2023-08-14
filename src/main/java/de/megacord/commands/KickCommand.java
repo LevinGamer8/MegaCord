@@ -2,8 +2,6 @@ package de.megacord.commands;
 
 import de.megacord.MegaCord;
 import de.megacord.utils.HistoryManager;
-import de.megacord.utils.MySQLConnection;
-import de.megacord.utils.UUIDFetcher;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
@@ -14,9 +12,6 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.config.Configuration;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.*;
 
 public class KickCommand extends Command {
@@ -45,8 +40,7 @@ public class KickCommand extends Command {
             }
 
             String grund = args.length > 1 ? args[1] : "Es wurde kein Grund angegeben.";
-
-            player.disconnect(new TextComponent(settings.getString("Kick.Disconnectmessage")));
+            player.disconnect(new TextComponent(ChatColor.translateAlternateColorCodes('&', settings.getString("Kick.Disconnectmessage").replace("%reason%", grund).replace("%absatz%", "\n\n"))));
 
                 HistoryManager historyManager = new HistoryManager();
                 historyManager.insertInDB(playerName, sender.getName(), "kick", grund, Long.parseLong("0"), Long.parseLong("0"), 0, 0);
@@ -62,7 +56,7 @@ public class KickCommand extends Command {
             int i = 1;
             while (true) {
                 try {
-                    String line = ChatColor.translateAlternateColorCodes('&', settings.getString("Kick.Extrainfohover." + i)).replace("%target%", playerName.toString()).replace("%name%", sender.getName()).replace("%reason%", grund);
+                    String line = ChatColor.translateAlternateColorCodes('&', settings.getString("Kick.Extrainfohover." + i)).replace("%target%", playerName).replace("%name%", sender.getName()).replace("%reason%", grund).replace("%erstellt%", MegaCord.formatTime(System.currentTimeMillis()));
                     hoverArray.add(line);
                     if (i > 4) {
                         break;

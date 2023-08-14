@@ -35,7 +35,7 @@ public class HistoryManager {
     public List<HistoryElement> readHistory(String target, int limit, int page, String what, boolean lastOnes) {
         List<HistoryElement> reports = new LinkedList<>();
         page = page * 10 - 10;
-        String sql = "SELECT * FROM history " + (target == null ? "" : "WHERE TargetUUID = ?") + (lastOnes ? "" : " AND Type = ? ") + "ORDER BY Erstellt DESC LIMIT ? OFFSET ?";
+        String sql = "SELECT * FROM history " + (target == null ? "" : "WHERE TargetName = ?") + (lastOnes ? "" : " AND Type = ? ") + "ORDER BY Erstellt DESC LIMIT ? OFFSET ?";
         try (Connection conn = MegaCord.getInstance().getDataSource().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             if (target != null)

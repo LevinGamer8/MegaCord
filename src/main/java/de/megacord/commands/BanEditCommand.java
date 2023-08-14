@@ -3,7 +3,6 @@ package de.megacord.commands;
 import de.megacord.MegaCord;
 import de.megacord.utils.BanUtils;
 import de.megacord.utils.Config;
-import de.megacord.utils.UUIDFetcher;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -12,7 +11,6 @@ import net.md_5.bungee.api.chat.hover.content.Text;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,7 +57,7 @@ public class BanEditCommand extends Command {
                                 sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Der Ban existiert bereits in der Form!"));
                                 return;
                             }
-                            ban.editban(1, args[2], pp == null ? UUIDFetcher.getUUID("CONSOLE").toString() : pp.getUniqueId().toString());
+                            ban.editban(1, args[2], pp == null ? "CONSOLE" : pp.getName());
                         } else {
                             sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Der Wert muss eine " + MegaCord.herH + "1 " + MegaCord.fehler + "oder eine " + MegaCord.herH + "0 " + MegaCord.fehler + "sein!"));
                             return;
@@ -75,7 +73,7 @@ public class BanEditCommand extends Command {
                         final Matcher matcher = pattern.matcher(args[2]);
 
                         while (matcher.find() || args[2].equalsIgnoreCase("-1")) {
-                            ban.editban(2, args[2], pp == null ? UUIDFetcher.getUUID("CONSOLE").toString() : pp.getUniqueId().toString());
+                            ban.editban(2, args[2], pp == null ? "CONSOLE" : pp.getName());
                             sender.sendMessage(new TextComponent(MegaCord.Prefix + "Der Ban wurde verändert!"));
                             return;
                         }
@@ -102,7 +100,7 @@ public class BanEditCommand extends Command {
                             sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Der Ban existiert bereits in der Form!"));
                             return;
                         }
-                        ban.editban(3, newReason, pp == null ? UUIDFetcher.getUUID("CONSOLE").toString() : pp.getUniqueId().toString());
+                        ban.editban(3, newReason, pp == null ? "CONSOLE" : pp.getName());
                     } else {
                         sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Gib noch einen neuen Wert (Value) ein"));
                         return;

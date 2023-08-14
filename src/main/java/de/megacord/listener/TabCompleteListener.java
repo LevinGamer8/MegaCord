@@ -23,6 +23,7 @@ public class TabCompleteListener implements Listener {
                 !cursor.startsWith("/alt ") &&
                 !cursor.startsWith("/warns ") &&
                 !cursor.startsWith("/bans ") &&
+                !cursor.startsWith("/banlist ") &&
                 !cursor.startsWith("/report ") &&
                 !cursor.startsWith("/reports ") &&
                 !cursor.startsWith("/ip ") &&

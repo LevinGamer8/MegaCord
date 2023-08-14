@@ -1,19 +1,19 @@
 package de.megacord.listener;
 
 import de.megacord.MegaCord;
-import de.megacord.utils.*;
+import de.megacord.utils.BanUtils;
+import de.megacord.utils.Onlinezeit;
+import de.megacord.utils.PlayerData;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.LoginEvent;
-import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.event.EventHandler;
-import org.geysermc.floodgate.api.FloodgateApi;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -75,6 +75,7 @@ public class PlayerJoinListener implements Listener {
                             BanUtils altAccountBan = new BanUtils(e.getConnection().getUniqueId().toString(), null, source, settings, standardBans);
                             altAccountBan.banByStandard(1, e.getConnection().getSocketAddress().toString().replace("/", "").split(":")[0]);
                             e.getConnection().disconnect(new TextComponent(ChatColor.translateAlternateColorCodes('&', settings.getString("Ban.Disconnectmessage").replace("%reason%", altAccountBan.getGrund()).replace("%absatz%", "\n"))));
+                            e.setCancelled(true);
                             return;
                         }
                         e.getConnection().disconnect(new TextComponent(ChatColor.translateAlternateColorCodes('&', String.join("\n", banArray))));

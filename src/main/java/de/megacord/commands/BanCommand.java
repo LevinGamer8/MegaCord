@@ -4,6 +4,7 @@ import de.megacord.MegaCord;
 import de.megacord.utils.BanUtils;
 import de.megacord.utils.Config;
 import de.megacord.utils.DateUnit;
+import de.megacord.utils.PlayerData;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
@@ -36,8 +37,10 @@ public class BanCommand extends Command {
                 }
 
                 String targetName = args[0];
-                sender.sendMessage(args[0]);
-                BanUtils currentBan = new BanUtils(targetName, null, MegaCord.getInstance().getDataSource(), Config.settings, Config.standardBans);
+
+                PlayerData pl = new PlayerData(targetName);
+
+                BanUtils currentBan = new BanUtils(targetName, pl.getLastip(), MegaCord.getInstance().getDataSource(), Config.settings, Config.standardBans);
                 currentBan.isBanned(targetName).whenComplete((result, ex) -> {
                     int banid = 0;
                     try {

@@ -44,7 +44,6 @@ public class WarnsCommand extends Command {
 
     private void sendHelp(int seite, ProxiedPlayer pp, String targetName) {
 
-        UUID uuid = UUID.fromString(UUIDFetcher.getUUID(targetName));
         int zeilen = 10;
         DBUtil.getWhatCount(MegaCord.getInstance().getDataSource(), targetName, "warn", true).whenComplete((allwarns, ex) -> {
             int allPages = allwarns / zeilen;
