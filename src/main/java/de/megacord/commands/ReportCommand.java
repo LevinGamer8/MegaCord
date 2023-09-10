@@ -39,7 +39,7 @@ public class ReportCommand extends Command {
         String reportedName = args[0];
         String reason = String.join(" ", args[1]);
         PlayerData pl = new PlayerData(reportedName);
-        if (!(pl.exists(reportedName))) {
+        if (!(pl.exists())) {
             sender.sendMessage(new TextComponent("§4Es wurde kein Spieler mit dem Namen '" + reportedName + "' gefunden."));
             return;
         }

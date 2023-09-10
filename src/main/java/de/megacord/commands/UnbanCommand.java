@@ -25,7 +25,7 @@ public class UnbanCommand extends Command {
             if (args.length == 1) {
 
                 PlayerData pd = new PlayerData(args[0]);
-                if (!(pd.exists(args[0]))) {
+                if (!(pd.exists())) {
                     sender.sendMessage(MegaCord.Prefix + "§4Der Spieler war noch nie auf dem Netzwerk!");
                     return;
                 }

@@ -1,5 +1,7 @@
 package de.megacord;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import de.megacord.commands.BungeeCommand;
 import de.megacord.utils.*;
 
@@ -102,12 +104,34 @@ public final class MegaCord extends Plugin {
             onDisable();
             return;
         }
+        getProxy().registerChannel( "megacord:inv" );
         Registry();
         initMySQL();
+
+    }
+
+
+    public void sendCustomData(ProxiedPlayer player, String data1, int data2)
+    {
+        Collection<ProxiedPlayer> networkPlayers = ProxyServer.getInstance().getPlayers();
+        // perform a check to see if globally are no players
+        if ( networkPlayers == null || networkPlayers.isEmpty() )
+        {
+            return;
+        }
+        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+        out.writeUTF( "megacordSUB" ); // the channel could be whatever you want
+        out.writeUTF( data1 ); // this data could be whatever you want
+        out.writeInt( data2 ); // this data could be whatever you want
+
+        // we send the data to the server
+        // using ServerInfo the packet is being queued if there are no players in the server
+        // using only the server to send data the packet will be lost if no players are in it
+        player.getServer().getInfo().sendData( "megacord:inv", out.toByteArray() );
     }
 
     private void Registry() {
-        Registry registry = new Registry(this, dataSource, de.megacord.utils.Config.settings, de.megacord.utils.Config.blacklist, de.megacord.utils.Config.standardBans, activechats);
+        Registry registry = new Registry(plugin, this, dataSource, de.megacord.utils.Config.settings, de.megacord.utils.Config.blacklist, de.megacord.utils.Config.standardBans, activechats);
         registry.registerCommands();
         registry.registerListeners();
     }
@@ -147,8 +171,6 @@ public final class MegaCord extends Plugin {
 
     public void specialFeatures() {
         this.getProxy().getPluginManager().unregisterCommand(new BungeeCommand());
-
-
     }
 
     public void onDisable() {

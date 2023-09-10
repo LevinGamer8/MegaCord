@@ -109,7 +109,7 @@ public class OnlineZeitCommand extends Command {
 
                         PlayerData pl = new PlayerData(args[0]);
 
-                        if (!(pl.exists(args[0]))) {
+                        if (!(pl.exists())) {
                             sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler existiert nicht!"));
                             return;
                         }
@@ -129,7 +129,7 @@ public class OnlineZeitCommand extends Command {
                     }
                     if (sender.hasPermission("megacord.onlinezeit.total.other") || sender.hasPermission("megacord.*") || sender.hasPermission("megacord.onlinezeit.*")) {
                         PlayerData pl = new PlayerData(args[1]);
-                        if (!(pl.exists(args[1]))) {
+                        if (!(pl.exists())) {
                             sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler existiert nicht!"));
                             return;
                         }
@@ -147,7 +147,7 @@ public class OnlineZeitCommand extends Command {
                     } catch (NumberFormatException e) { // /onlinezeit trend <Spieler>
                         if (sender.hasPermission("megacord.onlinezeit.trend.other") || sender.hasPermission("megacord.*") || sender.hasPermission("megacord.onlinezeit.*")) {
                             PlayerData pl = new PlayerData(args[1]);
-                            if (!(pl.exists(args[1]))) {
+                            if (!(pl.exists())) {
                                 sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler existiert nicht!"));
                                 return;
                             }
@@ -166,7 +166,7 @@ public class OnlineZeitCommand extends Command {
                     }
                     if (sender.hasPermission("megacord.onlinezeit.week.other") || sender.hasPermission("megacord.*") || sender.hasPermission("megacord.onlinezeit.*")) {
                         PlayerData pl = new PlayerData(args[1]);
-                        if (!(pl.exists(args[1]))) {
+                        if (!(pl.exists())) {
                             sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler existiert nicht!"));
                             return;
                         }
@@ -178,7 +178,7 @@ public class OnlineZeitCommand extends Command {
                 if (sender.hasPermission("megacord.onlinezeit.player.datum") || sender.hasPermission("megacord.*") || sender.hasPermission("megacord.onlinezeit.*")) {
                     // /onlinezeit <Spieler> <Datum>
                     PlayerData pl = new PlayerData(args[0]);
-                    if (!(pl.exists(args[0]))) {
+                    if (!(pl.exists())) {
                         sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler existiert nicht!"));
                         return;
                     }
@@ -200,7 +200,7 @@ public class OnlineZeitCommand extends Command {
                 if (args[0].equalsIgnoreCase("trend")) {
                     if (sender.hasPermission("megacord.onlinezeit.trend.other.days") || sender.hasPermission("megacord.*") || sender.hasPermission("megacord.onlinezeit.*")) {
                         PlayerData pl = new PlayerData(args[0]);
-                        if (!(pl.exists(args[1]))) {
+                        if (!(pl.exists())) {
                             sender.sendMessage(new TextComponent(MegaCord.Prefix + MegaCord.fehler + "Dieser Spieler existiert nicht!"));
                             return;
                         }

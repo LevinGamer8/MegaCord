@@ -97,7 +97,7 @@ public class Config {
                 ConfigurationProvider.getProvider(YamlConfiguration.class).save(ban, banFile);
             }
             ban = ConfigurationProvider.getProvider(YamlConfiguration.class).load(banFile);
-            if (!settingsFile.exists() || settingsFile == null) {
+            if (!settingsFile.exists()) {
                 settingsFile.createNewFile();
                 settings = ConfigurationProvider.getProvider(YamlConfiguration.class).load(settingsFile);
 

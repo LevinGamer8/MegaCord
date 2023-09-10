@@ -78,6 +78,7 @@ public class PlayerJoinListener implements Listener {
                             e.setCancelled(true);
                             return;
                         }
+                        e.setCancelled(true);
                         e.getConnection().disconnect(new TextComponent(ChatColor.translateAlternateColorCodes('&', String.join("\n", banArray))));
                     }
                 });
@@ -92,7 +93,7 @@ public class PlayerJoinListener implements Listener {
         pl.setIPOnlinePlayers(con.getAddress().getAddress().getHostAddress(), pl.getIPOnlinePlayers(con.getAddress().getAddress().getHostAddress()) + 1);
              if ((pl.getIPOnlinePlayers(con.getAddress().getAddress().getHostAddress()) > pl.getMaxIP(con.getAddress().getAddress().getHostAddress()))) {
                   e.setCancelled(true);
-                  con.disconnect("§3MegaCord §4AntiAlts \n\n §bMelde ich sofort im Support§4!!!\n\n §9Discord: §bhttps://dc-megacraft.de.cool/ \n\n §eID§7: §35896" + pl.getMaxIP(con.getAddress().getAddress().getHostAddress()));
+                  con.disconnect("§3MegaCord §4AntiAlts \n\n §bMelde dich sofort im Support§4!!!\n\n §9Discord: §bhttps://dc-megacraft.de.cool/ \n\n §eID§7: §35896" + pl.getMaxIP(con.getAddress().getAddress().getHostAddress()));
                  }
         if (e.isCancelled()) {
             pl.setIPOnlinePlayers(con.getAddress().getAddress().getHostAddress(), pl.getIPOnlinePlayers(con.getAddress().getAddress().getHostAddress()) - 1);

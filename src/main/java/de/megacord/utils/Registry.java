@@ -1,5 +1,6 @@
 package de.megacord.utils;
 
+import de.megacord.MegaCord;
 import de.megacord.commands.*;
 import de.megacord.listener.*;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -14,6 +15,7 @@ import java.util.logging.Level;
 public class Registry {
 
     private final Plugin plugin;
+    private final MegaCord megaCord;
     private final Configuration settings;
     private final Configuration blacklist;
     private final Configuration standardBans;
@@ -22,8 +24,9 @@ public class Registry {
 
 
 
-    public Registry(Plugin plugin, DataSource dataSource, Configuration settings, Configuration blacklist, Configuration standardBans, HashMap activechats) {
+    public Registry(Plugin plugin, MegaCord megaCord, DataSource dataSource, Configuration settings, Configuration blacklist, Configuration standardBans, HashMap activechats) {
         this.plugin = plugin;
+        this.megaCord = megaCord;
         this.dataSource = dataSource;
         this.settings = settings;
         this.blacklist = blacklist;
@@ -59,6 +62,7 @@ public class Registry {
         pluginManager.registerCommand(plugin, new BungeeCommand());
         pluginManager.registerCommand(plugin, new JumpCommand());
         pluginManager.registerCommand(plugin, new setMaxIP());
+        pluginManager.registerCommand(plugin, new test(megaCord));
         plugin.getLogger().log(Level.INFO, "Befehle wurden erfolgreich registriert");
     }
 
